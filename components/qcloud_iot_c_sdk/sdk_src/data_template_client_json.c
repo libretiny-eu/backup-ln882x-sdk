@@ -117,22 +117,22 @@ int put_json_node(char *jsonBuffer, size_t sizeOfBuffer, const char *pKey, void 
     } else {
         if (type == JINT32) {
             rc_of_snprintf =
-                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%" PRIi32 ",", *(int32_t *)(pData));
+                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%d,", *(int32_t *)(pData));
         } else if (type == JINT16) {
             rc_of_snprintf =
-                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%" PRIi16 ",", *(int16_t *)(pData));
+                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%d,", *(int16_t *)(pData));
         } else if (type == JINT8) {
             rc_of_snprintf =
-                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%" PRIi8 ",", *(int8_t *)(pData));
+                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%d,", *(int8_t *)(pData));
         } else if (type == JUINT32) {
             rc_of_snprintf =
-                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%" PRIu32 ",", *(uint32_t *)(pData));
+                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%u,", *(uint32_t *)(pData));
         } else if (type == JUINT16) {
             rc_of_snprintf =
-                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%" PRIu16 ",", *(uint16_t *)(pData));
+                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%u,", *(uint16_t *)(pData));
         } else if (type == JUINT8) {
             rc_of_snprintf =
-                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%" PRIu8 ",", *(uint8_t *)(pData));
+                HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%u,", *(uint8_t *)(pData));
         } else if (type == JDOUBLE) {
             rc_of_snprintf = HAL_Snprintf(jsonBuffer + strlen(jsonBuffer), remain_size, "%f,", *(double *)(pData));
         } else if (type == JFLOAT) {
