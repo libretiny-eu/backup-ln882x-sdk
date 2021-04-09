@@ -62,7 +62,7 @@ out:
     return LN_FALSE;
 }
 
-uint8_t ln_char2hex(char c)
+uint8_t ln_char2hex(char c)  
 {
     if(c - '0' <= 9) {
         return (c - '0');
@@ -70,7 +70,7 @@ uint8_t ln_char2hex(char c)
         return (c - 'a' + 10);
     } else {
         return (c - 'A' + 10);
-    }
+    } 
 }
 
 int ln_char2hex_safe(char c, uint8_t *hex)
@@ -114,7 +114,7 @@ int ln_is_valid_mac_str(const char* mac_str)
         return LN_FALSE;
     }
 
-    while (*mac_str)
+    while (*mac_str) 
     {
         if (isxdigit(*mac_str)) {
             i++;
@@ -134,16 +134,16 @@ int ln_is_valid_mac_str(const char* mac_str)
 
 int ln_mac_str2hex(const uint8_t *str, uint8_t *hex)
 {
-    const uint8_t *tmp = str;
+    const uint8_t *tmp = str;    
     if (LN_TRUE != ln_is_valid_mac_str((const char*)tmp)) {
         return LN_FALSE;
     }
 
-    for (int i = 0; i < 6; ++i) {
-        hex[i]  = ln_char2hex(*tmp++) * 16;
+    for (int i = 0; i < 6; ++i) {    
+        hex[i]  = ln_char2hex(*tmp++) * 16;    
         hex[i] += ln_char2hex(*tmp++);
         tmp++;
-    }
+    }       
     return LN_TRUE;
 }
 
@@ -170,7 +170,7 @@ int ln_is_zero_mem(const void *addr, uint32_t size)
     if (!addr) {
         return LN_FALSE;
     }
-
+    
     for (uint32_t i = 0; i < size; i++) {
         if(_addr[i]) {
             return LN_FALSE;
@@ -235,7 +235,6 @@ int ln_generate_random_mac(uint8_t *addr)
     CLR_BIT(addr[0],0);
     CLR_BIT(addr[0],1);
 #endif
-
     return 0;
 }
 

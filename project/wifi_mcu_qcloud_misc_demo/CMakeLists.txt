@@ -12,7 +12,6 @@ set(PRO_SRC
     ${PRO_DIR}/bsp/serial_hw.c
     ${PRO_DIR}/bsp/drv_adc_measure.c
     ${PRO_DIR}/startup/startup_ln882x_gcc.c
-    ${MCU_LN882X_DIR}/driver_ln882x/src/ll/ll_gpio.c
     ${CMAKE_SOURCE_DIR}/components/libc/newlib_stub.c
     ${QCLOUD_IOT_SAMPLES_SRC}
 )
@@ -39,6 +38,7 @@ target_link_libraries(${pro_executable_target}
     components::smartlink::softapcfg
     components::smartlink::smartcfg
     wifi
+    components::phony
     components::fota
     components::kernel
     components::fs::kv

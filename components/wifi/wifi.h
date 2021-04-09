@@ -266,122 +266,24 @@ int wifi_private_command(char *pvtcmd);
 
 uint8_t * get_wifi_lib_version(void);
 
-/** @brief Received packet radio metadata header, this is the common header at the beginning of all promiscuous mode RX callback buffers */
-typedef struct {
-    uint8_t rssi;
-} wifi_pkt_rx_ctrl_t;
-
-/*
- * @brief Payload passed to 'buf' parameter of promiscuous mode RX callback.
- */
-typedef struct {
-    wifi_pkt_rx_ctrl_t rx_ctrl; /**< metadata header */
-    uint8_t payload[1];       /**< Data or management payload. Length of payload is described by rx_ctrl.sig_len. Type of content determined by packet type argument of callback. */
-} wifi_promiscuous_pkt_t;
-
-/**
-  * @brief Promiscuous frame type
-  *
-  * Passed to promiscuous mode RX callback to indicate the type of parameter in the buffer.
-  *
-  */
-typedef enum {
-    WIFI_PKT_MGMT = 0, /**< Management frame, indicates 'buf' argument is wifi_promiscuous_pkt_t */
-    WIFI_PKT_CTRL,     /**< Control frame, indicates 'buf' argument is wifi_promiscuous_pkt_t */
-    WIFI_PKT_DATA,     /**< Data frame, indiciates 'buf' argument is wifi_promiscuous_pkt_t */
-    WIFI_PKT_MISC,     /**< Other type, such as MIMO etc. 'buf' argument is wifi_promiscuous_pkt_t but the payload is zero length. */
-} wifi_promiscuous_pkt_type_t;
-
-#define WIFI_PROMIS_FILTER_MASK_ALL         (0x7FFFFF)  /**< filter all packets */
-#define WIFI_PROMIS_FILTER_MASK_MGMT        (1)           /**< filter the packets with type of WIFI_PKT_MGMT */
-#define WIFI_PROMIS_FILTER_MASK_CTRL        (1<<1)        /**< filter the packets with type of WIFI_PKT_CTRL */
-#define WIFI_PROMIS_FILTER_MASK_DATA        (1<<2)        /**< filter the packets with type of WIFI_PKT_DATA */
-#define WIFI_PROMIS_FILTER_MASK_MISC        (1<<3)        /**< filter the packets with type of WIFI_PKT_MISC */
-#define WIFI_PROMIS_FILTER_MASK_DATA_MPDU   (1<<4)        /**< filter the MPDU which is a kind of WIFI_PKT_DATA */
-#define WIFI_PROMIS_FILTER_MASK_DATA_AMPDU  (1<<5)        /**< filter the AMPDU which is a kind of WIFI_PKT_DATA */
-
-#define WIFI_PROMIS_CTRL_FILTER_MASK_ALL         (0xFF800000)  /**< filter all control packets */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_WRAPPER     (1<<23)       /**< filter the control packets with subtype of Control Wrapper */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_BAR         (1<<24)       /**< filter the control packets with subtype of Block Ack Request */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_BA          (1<<25)       /**< filter the control packets with subtype of Block Ack */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_PSPOLL      (1<<26)       /**< filter the control packets with subtype of PS-Poll */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_RTS         (1<<27)       /**< filter the control packets with subtype of RTS */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_CTS         (1<<28)       /**< filter the control packets with subtype of CTS */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_ACK         (1<<29)       /**< filter the control packets with subtype of ACK */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_CFEND       (1<<30)       /**< filter the control packets with subtype of CF-END */
-#define WIFI_PROMIS_CTRL_FILTER_MASK_CFENDACK    (uint32_t)((uint32_t)1<<31)       /**< filter the control packets with subtype of CF-END+CF-ACK */
 
 
-/** @brief Mask for filtering different packet types in promiscuous mode. */
-typedef struct {
-    uint32_t filter_mask; /**< OR of one or more filter values WIFI_PROMIS_FILTER_* */
-} wifi_promiscuous_filter_t;
+#define WIFI_PKT_MGMT                       (0)             /**< sniffer packet is management frame */
+#define WIFI_PKT_CTRL                       (1)             /**< sniffer packet is control frame */
+#define WIFI_PKT_DATA                       (2)             /**< sniffer packet is data frame */
 
-/**
-  * @brief The RX callback function in the promiscuous mode.
-  *        Each time a packet is received, the callback function will be called.
-  *
-  * @param buf  Data received. Type of data in buffer (wifi_promiscuous_pkt_t or wifi_pkt_rx_ctrl_t) indicated by 'type' parameter.
-  * @param type  promiscuous packet type.
-  *
-  */
-typedef void (* wifi_promiscuous_cb_t)(void *buf, uint16_t len, wifi_promiscuous_pkt_type_t type);
+#define WIFI_PROMIS_FILTER_MASK_MGMT        (1UL << 0U)     /**< WIFI_PKT_MGMT packet filter mask */
+#define WIFI_PROMIS_FILTER_MASK_CTRL        (1UL << 1U)     /**< WIFI_PKT_CTRL packet filter mask */
+#define WIFI_PROMIS_FILTER_MASK_DATA        (1UL << 2U)     /**< WIFI_PKT_DATA packet filter mask */
+#define WIFI_PROMIS_FILTER_MASK_ALL         (0xFFFFFFFF)    /**< all packets filter mask */
 
-/**
-  * @brief Register the RX callback function in the promiscuous mode.
-  *
-  * Each time a packet is received, the registered callback function will be called.
-  *
-  * @param cb  callback
-  */
+typedef void (* wifi_promiscuous_cb_t)(void *buf, uint16_t len, uint8_t pkt_type);
+
 void wifi_set_promiscuous_rx_cb(wifi_promiscuous_cb_t cb);
-
-/**
-  * @brief     Enable the promiscuous mode.
-  *
-  * @param     en  false - disable, true - enable
-  *
-  * @return
-  *    - true: succeed
-  *    - false: WiFi is not initialized by wifi_init
-  */
-int wifi_set_promiscuous(bool en);
-
-/**
-  * @brief     Get the promiscuous mode.
-  *
-  * @param[out] en  store the current status of promiscuous mode
-  *
-  * @return
-  *    - true: succeed
-  *    - false: WiFi is not initialized by wifi_init or invalid argument
-  *
-  */
-int wifi_get_promiscuous(bool *en);
-
-/**
-  * @brief Enable the promiscuous mode packet type filter.
-  *
-  * @note The default filter is to filter all packets except WIFI_PKT_MISC
-  *
-  * @param filter the packet type filtered in promiscuous mode.
-  *
-  * @return
-  *    - true: succeed
-  *    - false: WiFi is not initialized by wifi_init
-  */
-int wifi_set_promiscuous_filter(const wifi_promiscuous_filter_t *filter);
-
-/**
-  * @brief     Get the promiscuous filter.
-  *
-  * @param[out] filter  store the current status of promiscuous filter
-  *
-  * @return
-  *    - true: succeed
-  *    - false: WiFi is not initialized by wifi_init or invalid argument
-  */
-int wifi_get_promiscuous_filter(wifi_promiscuous_filter_t *filter);
+int  wifi_set_promiscuous(bool en);
+int  wifi_get_promiscuous(bool *en);
+int  wifi_set_promiscuous_filter(uint32_t filter_mask);
+int  wifi_get_promiscuous_filter(uint32_t *filter_mask);
 
 
 

@@ -29,12 +29,8 @@ void ln_sc_wifi_channel_hop_stop(void)
 
 void ln_sc_wifi_sniffer_enable(void * callback)
 {
-    wifi_promiscuous_filter_t filter = {0};
+    wifi_set_promiscuous_filter(WIFI_PROMIS_FILTER_MASK_DATA);
 
-    filter.filter_mask = WIFI_PROMIS_FILTER_MASK_DATA;
-
-    wifi_set_promiscuous_filter(&filter);
-    
     wifi_set_promiscuous_rx_cb((wifi_promiscuous_cb_t)callback);
 
     wifi_set_promiscuous(true);
@@ -58,10 +54,10 @@ int ln_sc_udp_send_ack(uint8_t random)
 	uint8_t send_data = 0;
 	int optval = 0;
 	int ret = 0;
-    
+
 	struct sockaddr_in addr;
 	int socketfd;
-    
+
 	send_data = random;
 
 	if (0 > (socketfd = socket(AF_INET, SOCK_DGRAM, 0))) {
@@ -82,7 +78,7 @@ int ln_sc_udp_send_ack(uint8_t random)
 		goto err;
 	}
 
-	for (uint16_t i = 0; i < 20; i ++) 
+	for (uint16_t i = 0; i < 20; i ++)
     {
 		ret = sendto(socketfd, &send_data, sizeof(send_data), 0, (struct sockaddr *)&addr, sizeof(addr));
 		if (ret == -1) {

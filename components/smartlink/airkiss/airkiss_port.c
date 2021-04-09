@@ -70,10 +70,7 @@ void ak_port_wifi_channel_hop_timer_del(void)
 
 void ak_port_wifi_sniffer_enable(void * callback)
 {
-    wifi_promiscuous_filter_t filter = {0};
-
-    filter.filter_mask = WIFI_PROMIS_FILTER_MASK_DATA;
-    wifi_set_promiscuous_filter(&filter);
+    wifi_set_promiscuous_filter(WIFI_PROMIS_FILTER_MASK_DATA);
     wifi_set_promiscuous_rx_cb((wifi_promiscuous_cb_t)callback);
     wifi_set_promiscuous(true);
 }

@@ -20,7 +20,7 @@ set(LIBRARY_OUTPUT_PATH  ${CMAKE_BINARY_DIR}/lib)
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # NOTE: default build type is Debug
-# set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Release)
 
 if(NOT  CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE  Debug)
@@ -64,6 +64,7 @@ add_custom_command(TARGET  PHONY_TARGET_FLASH_PART_TABLE
 
 ##########################   default module selection   ########################
 option(COMP_MCU_LN882X_SUPPORT  "MCU LN882X driver."                            OFF)
+option(COMP_WIFI_SUPPORT        "WiFi firmware."                                OFF)
 option(COMP_ATCMD_SUPPORT       "For WiFi operation && Iperf && Ping test."     OFF)
 option(COMP_FOTA_SUPPORT        "OTA image process."                            OFF)
 option(COMP_KV_SUPPORT          "Lightweight persisent storage module."         ON)
@@ -81,9 +82,7 @@ option(COMP_AIRKISS_SUPPORT     "AirKiss for device network setup."             
 option(COMP_SMARTCFG_SUPPORT    "SmartConfig for device network setup."         OFF)
 option(COMP_SOFTAPCFG_SUPPORT   "SoftAP for device network setup."              OFF)
 option(COMP_UTILS_SUPPORT       "Utils for misc operations, must be built."     ON)
-option(COMP_WIFI_SUPPORT        "WiFi firmware."                                OFF)
 option(COMP_QCLOUD_SDK_SUPPORT  "Tencent Qcloud SDK."                           OFF)
-
 
 ###########################   define module top dir   ##########################
 
@@ -107,7 +106,7 @@ set(COMP_SOFTAPCFG_DIR    ${CMAKE_SOURCE_DIR}/components/smartlink/softapcfg)
 set(COMP_UTILS_DIR        ${CMAKE_SOURCE_DIR}/components/utils)
 set(COMP_WIFI_DIR         ${CMAKE_SOURCE_DIR}/components/wifi)
 set(COMP_QCLOUD_SDK_DIR   ${CMAKE_SOURCE_DIR}/components/qcloud_iot_c_sdk)
-
+set(COMP_PHONY_DIR        ${CMAKE_SOURCE_DIR}/components/phony)  # NOTE: MUST be built
 
 #############################    user project    ###############################
 # NOTE: set build condition inside user project.
@@ -115,13 +114,9 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT})
 
 ###########################  select module libraries  ##########################
 
-# TODO: build libc to a static library.
-# add_subdirectory(${CMAKE_SOURCE_DIR}/components/libc)
-
 if(COMP_MCU_LN882X_SUPPORT)
   add_subdirectory(${MCU_LN882X_DIR})
 endif(COMP_MCU_LN882X_SUPPORT)
-
 
 if(COMP_ATCMD_SUPPORT)
   add_subdirectory(${COMP_ATCMD_DIR})
@@ -199,3 +194,5 @@ if(COMP_WIFI_SUPPORT)
   add_subdirectory(${COMP_WIFI_DIR})
 endif(COMP_WIFI_SUPPORT)
 
+# MCU driver 和 wifi 部分文件开放给用户，没有被编入到对应库中，它们被编入 PHONY 组件
+add_subdirectory(${COMP_PHONY_DIR})

@@ -7,7 +7,6 @@ set(PRO_SRC
     ${PRO_DIR}/bsp/drv_adc_measure.c
     ${PRO_DIR}/examples/tcp_server_echo.c
     ${PRO_DIR}/startup/startup_ln882x_gcc.c
-    ${MCU_LN882X_DIR}/driver_ln882x/src/ll/ll_gpio.c
     ${CMAKE_SOURCE_DIR}/components/libc/newlib_stub.c
 )
 
@@ -20,6 +19,7 @@ add_executable(${pro_executable_target}  ${PRO_SRC})
 target_link_libraries(${pro_executable_target}
     PUBLIC
     wifi
+    components::phony
     components::kernel
     components::net::lwip
     components::fs::kv
