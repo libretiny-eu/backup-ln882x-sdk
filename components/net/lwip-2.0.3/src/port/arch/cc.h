@@ -80,10 +80,10 @@
 /* Whether to use LWIP error codes */
 #define LWIP_PROVIDE_ERRNO  (1)
 
-#if (defined(__GNUC__))
-	/* Use private struct timeval */
+#if (defined(__GNUC__) && !defined(__CC_ARM))
+    /* Use private struct timeval */
 	#define LWIP_TIMEVAL_PRIVATE    0
-	#if (!LWIP_TIMEVAL_PRIVATE)
+    #if (!LWIP_TIMEVAL_PRIVATE)
 	#include <sys/time.h>
 	#endif
 
@@ -132,14 +132,14 @@
 #ifndef LWIP_PLATFORM_DIAG
   #define LWIP_PLATFORM_DIAG(x)   do {__printf x;} while(0)
 #endif
-  
+
 #ifndef LWIP_PLATFORM_ASSERT
   #define LWIP_PLATFORM_ASSERT(x)                                                   \
   do {                                                                              \
       __printf("Assertion \"%s\" failed at line %d in %s\n",x, __LINE__, __FILE__); \
   } while(0)
 #endif
-  
+
 #ifndef LWIP_ERROR
   #define LWIP_ERROR(message, expression, handler)                                             \
   do {                                                                                         \

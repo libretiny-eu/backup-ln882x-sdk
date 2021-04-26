@@ -108,7 +108,7 @@ static u16_t ip_id;
 
 #if LWIP_MULTICAST_TX_OPTIONS
 /** The default netif used for multicast */
-static struct netif* ip4_default_multicast_netif;
+struct netif* ip4_default_multicast_netif;
 
 /**
  * @ingroup ip4

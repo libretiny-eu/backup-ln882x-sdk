@@ -110,7 +110,7 @@ static const char * const print_info[] = {
         [PRINT_MAIN_STACK_INFO]       = "====== Main stack information ======",
         [PRINT_THREAD_STACK_OVERFLOW] = "Error: Thread stack(%08x) was overflow",
         [PRINT_MAIN_STACK_OVERFLOW]   = "Error: Main stack(%08x) was overflow",
-        [PRINT_CALL_STACK_INFO]       = "Show more call stack info by run: addr2line -e %s%s -a -f %.*s",
+        [PRINT_CALL_STACK_INFO]       = "Show more call stack info by run: arm-none-eabi-addr2line -e %s%s -a -f %.*s",
         [PRINT_CALL_STACK_ERR]        = "Dump call stack has an error",
         [PRINT_FAULT_ON_THREAD]       = "Fault on thread %s",
         [PRINT_FAULT_ON_HANDLER]      = "Fault on interrupt or bare metal(no OS) environment",
@@ -260,11 +260,11 @@ static void get_cur_thread_stack_info(uint32_t sp, uint32_t *start_addr, size_t 
     *start_addr = (uint32_t) OSTCBCur->OSTCBStkBottom;
     *size = OSTCBCur->OSTCBStkSize * sizeof(OS_STK);
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSIII)
-    extern OS_TCB *OSTCBCurPtr; 
-    
+    extern OS_TCB *OSTCBCurPtr;
+
     *start_addr = (uint32_t) OSTCBCurPtr->StkBasePtr;
     *size = OSTCBCurPtr->StkSize * sizeof(CPU_STK_SIZE);
-#elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)   
+#elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)
     *start_addr = (uint32_t)vTaskStackAddr();
     *size = vTaskStackSize() * sizeof( StackType_t );
 #endif
@@ -286,8 +286,8 @@ static const char *get_cur_thread_name(void) {
 #endif /* OS_TASK_NAME_SIZE > 0 || OS_TASK_NAME_EN > 0 */
 
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSIII)
-    extern OS_TCB *OSTCBCurPtr; 
-    
+    extern OS_TCB *OSTCBCurPtr;
+
     return (const char *)OSTCBCurPtr->NamePtr;
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)
     return vTaskName();

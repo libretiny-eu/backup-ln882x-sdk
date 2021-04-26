@@ -166,7 +166,7 @@ typedef struct {
 } station_info_t;
 
 typedef struct {
-    ln_list_t                list;
+    ln_list_t             list;
     uint8_t               bssid[BSSID_LEN];
     uint8_t               ssid[SSID_MAX_LEN];
     uint8_t               ssid_len;

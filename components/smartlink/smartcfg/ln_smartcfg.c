@@ -1,7 +1,7 @@
 #include "ln_smartcfg_port.h"
 #include "ln_smartcfg_api.h"
 #include "ln_smartcfg.h"
-#include "ll_common.h"
+#include "ll/ll_common.h"
 
 static sc_ctl_t * sc_ctl;
 static uint8_t    sc_ssid[WLAN_SSID_MAX_LEN];

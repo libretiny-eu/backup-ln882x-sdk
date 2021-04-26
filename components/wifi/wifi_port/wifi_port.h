@@ -72,6 +72,14 @@ void   wlib_ssid_gbk2utf8(char *ssid);
 
 
 /* os service */
+#define WLIB_OS_WAIT_FOREVER          (0xffffffffU)
+#define WLIB_OS_PRIORITY_LOW          (1)
+#define WLIB_OS_PRIORITY_BELOW_NORMAL (2)
+#define WLIB_OS_PRIORITY_NORMAL       (3)
+#define WLIB_OS_PRIORITY_ABOVE_NORMAL (4)
+#define WLIB_OS_PRIORITY_HIGH         (5)
+#define WLIB_OS_PRIORITY_REAL_TIME    (6)
+
 typedef void *wlib_thread_t;
 typedef void *wlib_mutex_t;
 typedef void *wlib_sem_t;

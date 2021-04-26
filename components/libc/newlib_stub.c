@@ -8,16 +8,7 @@
 #include <sys/time.h>
 #include <stdarg.h>
 
-//#include <k_api.h>
-//#include "aos/kernel.h"
-
-//#include "aos/hal/uart.h"
-
-//#include "fs/vfs_conf.h"
-//#include "network/network.h"
-//#ifdef WITH_LWIP_TELNETD
-//#include "lwip/apps/telnetserver.h"
-//#endif
+#include "osal/osal.h"
 
 #define FD_VFS_START VFS_FD_OFFSET
 #define FD_VFS_END   (FD_VFS_START + VFS_MAX_FILE_NUM - 1)
@@ -135,6 +126,7 @@ void *_sbrk_r(struct _reent *ptr, ptrdiff_t incr)
     return NULL;
 }
 
+
 int _stat_r(struct _reent *ptr, const char *file, struct stat *pstat)
 {
     return 0;
@@ -166,6 +158,7 @@ void *_malloc_r(struct _reent *ptr, size_t size)
 {
     void *mem;
 
+    mem = (void *)OS_Malloc(size);
 
     return mem;
 }
@@ -187,6 +180,9 @@ void *_calloc_r(struct _reent *ptr, size_t size, size_t len)
 
 void _free_r(struct _reent *ptr, void *addr)
 {
+    if (NULL != addr) {
+        OS_Free(addr);
+    }
 }
 
 void _exit(int status)

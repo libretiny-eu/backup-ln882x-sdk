@@ -50,8 +50,8 @@ void FLASH_Deinit(void)
 uint8_t FLASH_Read(uint32_t offset, uint32_t length, uint8_t *buffer)
 {
     uint8_t shift = ((uint32_t)buffer & 0x03) ? (4 - (uint32_t)buffer & 0x03) : 0;
-    uint32_t length_in_words = (length - shift) / sizeof(uint32_t);
-    uint8_t remainder = (length - shift) % sizeof(uint32_t);
+    uint32_t length_in_words = (length > shift) ? ((length - shift) / sizeof(uint32_t)) : 0;
+    uint8_t remainder = (length > shift) ? ((length - shift) % sizeof(uint32_t)) : 0;
     uint8_t read_cmd_buf[4];
 
     assert_param( (offset+length) <= FALSH_SIZE_MAX );

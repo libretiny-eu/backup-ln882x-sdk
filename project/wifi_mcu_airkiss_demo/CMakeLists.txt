@@ -22,11 +22,11 @@ target_link_libraries(${pro_executable_target}
     PUBLIC
     components::smartlink::airkiss
     wifi
-    components::phony
     components::kernel
     components::atcmd
     components::utils
     components::serial
+    components::phony
     driver_ln882x
     -lc -lm -lnosys
 
@@ -46,4 +46,3 @@ target_include_directories(${pro_executable_target}
 )
 
 include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-postbuild.cmake)
-include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-jlink.cmake)

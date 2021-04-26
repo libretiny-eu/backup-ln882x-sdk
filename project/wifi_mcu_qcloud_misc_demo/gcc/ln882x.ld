@@ -19,20 +19,20 @@ SECTIONS
 		__copysection_ram0_load = LOADADDR(.flash_copysection);
 		__copysection_ram0_start = .;
 		KEEP(*(.vectors)) /* startup code: ARM vectors */
-		*ll_qspi.o(.text*)
-		*ll_cache.o(.text*)
-		*ll_dma.o(.text*)
-		*ll_syscon.o(.text*)
-		*ll_sleep.o(.text*)
-		*ll_rtc.o(.text*)
-		*cache.o(.text*)
-		*qspi.o(.text*)
-		*flash.o(.text*)
-		*hal_dma.o(.text*)
-		*hal_syscon.o(.text*)
-		*hal_sleep.o(.text*)
-		*hal_rtc.o(.text*)
-		*port.o(.text*)
+		*ll_qspi.o*(.text*)
+		*ll_cache.o*(.text*)
+		*ll_dma.o*(.text*)
+		*ll_syscon.o*(.text*)
+		*ll_sleep.o*(.text*)
+		*ll_rtc.o*(.text*)
+		*cache.o*(.text*)
+		*qspi.o*(.text*)
+		*flash.o*(.text*)
+		*hal_dma.o*(.text*)
+		*hal_syscon.o*(.text*)
+		*hal_sleep.o*(.text*)
+		*hal_rtc.o*(.text*)
+		*port.o*(.text*)
 
 		/* Optional .text part*/
 		/*
@@ -45,7 +45,7 @@ SECTIONS
 		*/
 
 		. = ALIGN(4);
-		/*all RW data in ram0�� wlan shared memory and lwip pubf pool are not in this section, they are in .bss section*/
+		/*all RW data in ram0 wlan shared memory and lwip pubf pool are not in this section, they are in .bss section*/
 		*(.data*)
 		. = ALIGN(4);
 		/* preinit data */

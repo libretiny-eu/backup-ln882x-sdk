@@ -139,6 +139,10 @@ err:
 	return AK_FALSE;
 }
 
+__WEAK__  int HAL_GetDevInfo(void *pdevInfo)
+{
+	return AK_FALSE;
+}
 
 /**
  * @brief

@@ -8,7 +8,7 @@
 #define LN_CLR_BIT(x,n)          ((x) &= ~(1U << (n)))
 #define LN_REVERSE_BIT(x,n)      ((x) ^=  (1U << (n)))
 #define LN_GET_BIT(x,n)          (((x) >> (n)) & 1U)
-#define LN_IS_BIT_SET(x,n)       (((x) >> (n)) & 1U)           
+#define LN_IS_BIT_SET(x,n)       (((x) >> (n)) & 1U)
 #define LN_IS_BIT_CLR(x,n)       ((((x) >> (n)) & 1U) == 0)
 
 
@@ -39,6 +39,10 @@
 #define	MAX(a,b)                 (((a)>(b)) ? (a) : (b))
 #endif
 
+/** Eliminates compiler warning about unused arguments (GCC -Wextra -Wunused). */
+#ifndef LN_UNUSED_ARG
+#define LN_UNUSED_ARG(x) (void)x
+#endif
 
 
 #endif /* __LN_UTILS_H__ */

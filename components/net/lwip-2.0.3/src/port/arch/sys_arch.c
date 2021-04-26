@@ -43,10 +43,11 @@
 #endif
 
 #if (NO_SYS == 0)
-
-#if defined(LWIP_PROVIDE_ERRNO)
-  int errno;
-#endif
+    #if (defined(__GNUC__) && !defined(__CC_ARM))
+        extern int errno;
+    #else defined(__CC_ARM)
+        int errno;
+    #endif
 
 /*
  * *---------------- Mutexes -----------------*
@@ -99,7 +100,7 @@ void sys_mutex_free(sys_mutex_t *mutex)
         LWIP_ERROR("sys_mutex_free: failed", 0, while(1));
         SYS_STATS_INC(mutex.err);
     }
-    
+
     #if LWIP_RESOURCE_TRACE
     g_lwip_mutex_cnt--;
     #endif
@@ -166,7 +167,7 @@ void sys_sem_free(sys_sem_t *sem)
         LWIP_ERROR("sys_sem_free: failed", 0, while(1));
         SYS_STATS_INC(sem.err);
     }
-    
+
     #if LWIP_RESOURCE_TRACE
     g_lwip_sem_cnt--;
     #endif
@@ -213,18 +214,18 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
     #if LWIP_RESOURCE_TRACE
     g_lwip_mbox_cnt++;
     #endif
-  
+
     err_t err = OS_MsgQueueCreate(MBOX2Q(mbox), size);
     if (err == OS_OK) {
         SYS_STATS_INC_USED(mbox);
-          
+
         #if LWIP_MBOX_TRACE
         mbox->avail = size;
         mbox->used = 0;
         mbox->max = 0;
         mbox->err = 0;
         #endif
-          
+
         return ERR_OK;
     } else {
         SYS_STATS_INC(mbox.err);
@@ -304,7 +305,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 
       if (timeout == 0) {
           u32_t wait = 10;
-          while (1) 
+          while (1)
           {
               if (OS_MsgQueueReceive(MBOX2Q(mbox), msg, wait * 60 * 1000) != OS_OK) {
                   printf("%s(), mbox %p, wait %u min time out, @ %s():%d\n", __func__, mbox, wait, func, line);
@@ -376,19 +377,19 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
           printf("%s(), mbox %p, @ %s():%d\n", __func__, mbox, func, line);
           g_trace_mbox = NULL;
       }
-      
+
       #if LWIP_MBOX_TRACE
       LWIP_PLATFORM_DIAG(("free mbox %p, avail %u, used %u, max %u, err %u\n",
       mbox, mbox->avail, mbox->used, mbox->max, mbox->err));
       #endif
-      
+
       if (OS_MsgQueueDelete(MBOX2Q(mbox)) == OS_OK) {
           SYS_STATS_DEC(mbox.used);
       } else {
           LWIP_ERROR("sys_mbox_free: mbox not empty", 0, while(1));
           SYS_STATS_INC(mbox.err);
       }
-      
+
       #if LWIP_RESOURCE_TRACE
       g_lwip_mbox_cnt--;
       #endif
@@ -400,21 +401,21 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
       LWIP_PLATFORM_DIAG(("free mbox %p, avail %u, used %u, max %u, err %u\n",
       mbox, mbox->avail, mbox->used, mbox->max, mbox->err));
       #endif
-    
+
       if (OS_MsgQueueDelete(MBOX2Q(mbox)) == OS_OK) {
           SYS_STATS_DEC(mbox.used);
       } else {
           LWIP_ERROR("sys_mbox_free: mbox not empty", 0, while(1));
           SYS_STATS_INC(mbox.err);
       }
-      
+
       #if LWIP_RESOURCE_TRACE
       g_lwip_mbox_cnt--;
       #endif
   }
-#endif  
+#endif
 
-  
+
 /* Support only one tcpip thread to save space */
 static OS_Thread_t g_lwip_tcpip_thread;
 
@@ -438,7 +439,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 
 #endif /* (NO_SYS == 0) */
 
-  
+
 #if (SYS_LIGHTWEIGHT_PROT && SYS_ARCH_PROTECT_USE_MUTEX)
   /** mutex for SYS_ARCH_PROTECT */
   OS_Mutex_t g_lwip_sys_mutex;

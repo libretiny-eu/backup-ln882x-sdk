@@ -79,6 +79,11 @@ a lot of data that needs to be copied, this should be set high. */
 /* ---------- ICMP options ---------- */
 #define LWIP_ICMP               1
 
+/* ---------- IGMP options ---------- */
+#define LWIP_IGMP               1
+#define LWIP_NETIF_LOOPBACK     1
+#define LWIP_LOOPIF_MULTICAST   1
+
 /* ---------- DHCP options ---------- */
 #define LWIP_DHCP               1
 #define DHCP_CREATE_RAND_XID    1

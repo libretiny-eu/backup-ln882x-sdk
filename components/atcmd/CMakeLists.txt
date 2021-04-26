@@ -20,6 +20,7 @@ target_link_libraries(${atcmd_static_target}
     components::net::ping
     components::net::iperf
     components::net::dhcpd
+    components::phony
 )
 
 target_include_directories(${atcmd_static_target}

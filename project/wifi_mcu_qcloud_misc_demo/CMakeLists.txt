@@ -38,13 +38,13 @@ target_link_libraries(${pro_executable_target}
     components::smartlink::softapcfg
     components::smartlink::smartcfg
     wifi
-    components::phony
     components::fota
     components::kernel
     components::fs::kv
     components::utils
     components::atcmd
     components::serial
+    components::phony
     driver_ln882x
     -lc -lm -lnosys
 
@@ -68,4 +68,3 @@ target_include_directories(${pro_executable_target}
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/gcc/gcc-postbuild.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/gcc/gcc-jlink.cmake)

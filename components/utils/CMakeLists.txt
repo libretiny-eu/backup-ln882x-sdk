@@ -8,6 +8,11 @@ set(utils_static_target "utils")
 add_library(${utils_static_target} STATIC ${UTILS_SRC})
 add_library(components::utils ALIAS ${utils_static_target})
 
+target_link_libraries(${utils_static_target}
+    PUBLIC
+    components::phony
+)
+
 target_include_directories(${utils_static_target}
     PUBLIC
     ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/bsp

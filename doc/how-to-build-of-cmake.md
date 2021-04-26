@@ -6,13 +6,26 @@
 
 工程目录中使用 `CMakeLists.txt` 文件来描述 CMake 规则和构建目标，类似于 `Makefile`。
 
-Ubuntu 上使用 CMake 编译，需要提前安装 **python** 和 **cmake**。
+# 环境配置
 
-## 常用构建步骤
+## Ubuntu 环境配置
 
-1. 在工程顶层目录包含一个文件 `CMakeLists.txt`， 创建一个 **build/** 文件夹，专门用来存放构建中间文件和最终的输出文件；
-2. 命令行进入 **build/** 文件夹，然后输入 `cmake -DXXX_ARG=XXX_VAL ..` 开始生成 Makefile，这里向 CMake 传递了一个参数 `XXX_ARG` 它的值为 `XXX_VAL`，其中的 `..` 这表示源码位于上一层目录，变量 `CMAKE_SOURCE_DIR` 表示源码顶层目录，而 `CMAKE_BINARY_DIR` 表示构建所在的目录，通常是指 **build/** 目录；
-3. 命令行位于 **build/** 文件夹，输入 `make` 开始编译。
+1. Ubuntu 上使用 CMake 编译，需要提前安装 **python**, **make** 和 **cmake**；
+2. 配置交叉编译器，以 Ubuntu 18.04.1 x64版本为例，从 [Arm官网](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) 下载交叉编译器 **gcc-arm-none-eabi-10-2020-q4-major-x86_64-linux.tar.bz2**，并解压到某个目录，例如 `$HOME/portableInstalls/`；
+3. 在文件 `$HOME/.bashrc` 末尾添加如下内容，设置交叉编译器环境变量：
+```sh
+CROSS_TOOLCHAIN_ROOT=$HOME/portableInstalls/gcc-arm-none-eabi-10-2020-q4-major
+export CROSS_TOOLCHAIN_ROOT
+```
+4. 重新启动终端或者输入命令 `source $HOME/.bashrc` 使得环境变量生效；
+
+## Win10 环境配置
+
+1. 在 Windows 上使用 CMake 编译，需要提前安装 **python**, **GNU Make** 和 **cmake** 并添加到环境变量 **PATH** 中；
+2. 配置交叉编译器，以 Win10 x64为例，从 [Arm官网](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) 下载交叉编译器 **gcc-arm-none-eabi-10-2020-q4-major-win32.zip**，并解压缩到某个目录，例如 `D:\PortableInstalls`，并添加到环境变量 **PATH** 中，确保命令行中输入 `arm-none-eabi-gcc --version` 能看到版本信息；
+3. 配置环境变量，给用户添加一个环境变量 `CROSS_TOOLCHAIN_ROOT`，它的值就是 `D:\PortableInstalls\gcc-arm-none-eabi-10-2020-q4-major`；
+4. 重新启动一个终端输入命令 `echo %CROSS_TOOLCHAIN_ROOT%` 检查值是否正确；
+
 
 # 项目构建
 ## 项目结构
@@ -53,20 +66,35 @@ option(COMP_WIFI_SUPPORT        "WiFi firmware."                                
 
 上一步生成的库文件存在于 **build/lib** 目录，拷贝其中的 `libwifi.a` 和 `libdriver_ln882x.a` 两个文件到 **${CMAKE_SOURCE_DIR}/lib/gcclib** 目录中。
 
-## 如何构建用户工程
+## 如何构建
+
+### 简易构建步骤
 
 参见顶层目录 `start_build.sh`， 传递给脚本的第一个参数就是用户工程的名字，即 `${CMAKE_SOURCE_DIR}/project` 目录下的用户工程名字，例如 **wifi_mcu_basic_example** 或者 **wifi_mcu_smartconfig_demo** 等。
 
 它通过 `cd build && cmake -DUSER_PROJECT=wifi_mcu_basic_example ..` 传递给 CMake，即 `CMakeLists.txt` 文件中的 `USER_PROJECT` 变量指代用户工程的名字。
 
-gcc 编译输出的文件是 `build/xxx.elf`，在经过我们的工具加工之后生成的可烧录到 Flash 上的文件是 **build/flashimage.bin** 。
+gcc 编译输出的文件是 `build/xxx.elf`，在经过我们的工具加工之后生成的可烧录到 Flash 上的文件是 **build/bin/flashimage.bin** 。
 
-## 脚本 `start_build.sh` 使用指南
+#### 脚本 `start_build.sh` 和 `start_build.bat` 使用指南
 
-1. 在顶层目录 `./start_build.sh` 不带参数， 会打印脚本的用法，并且清空 `build/` 目录；
+Linux 平台使用 `start_build.sh` 脚本；Windows 平台使用 `start_build.bat` 脚本。两个脚本功能一致，参数和用法也相同。
 
-2. 在顶层目录 `./start_build.sh   wifi_mcu_basic_example` 带一个表示用户工程的参数，会调用 CMake 进行工程配置生成 `build/Makefile`；
+下面以 Windows 平台的 `start_build.bat` 脚本为例说明，
 
-3. 在顶层目录 `./start_build.sh   wifi_mcu_basic_example  build` 在上一步的基础上开始编译工程；
+1. 在顶层目录 `start_build.bat` 不带参数， 会打印脚本的用法；
+2. 在顶层目录 `start_build.bat   wifi_mcu_basic_example   clean` 清除 `build/` 目录，清空上一次编译结果；
+3. 在顶层目录 `start_build.bat   wifi_mcu_basic_example   config`  配置用户工程生成  `build/` 目录 ；
+4. 在顶层目录 `start_build.bat   wifi_mcu_basic_example   build` 在上一步的基础上开始编译工程；
+5. 在顶层目录 `start_build.bat   wifi_mcu_basic_example   rebuild` 会自动依次执行上面的3个步骤；
+6. 在顶层目录 `start_build.bat   wifi_mcu_basic_example   jflash` 会调用 **J-Flash** 工具下载生成的 `build/bin/flashimage.bin` 文件到模块上（请先确保J-Link USB 连线正确，模块已经上电）；
 
-4. 在顶层目录 `./start_build.sh   wifi_mcu_basic_example  rebuild` 会自动依次执行上面的3个步骤；
+#### 注意事项
+
+如在 Windows 平台编译，请先退出杀毒软件（XXX安全卫士或者XXX电脑管家），因为杀毒软件一直在扫描编译生成的目标文件，导致编译速度非常慢。
+
+### 命令行构建步骤
+
+1. 在工程顶层目录包含一个文件 `CMakeLists.txt`， 创建一个 **build/** 文件夹，专门用来存放构建中间文件和最终的输出文件；
+2. 命令行进入 **build/** 文件夹，然后输入 `cmake -DXXX_ARG=XXX_VAL ..` 开始生成 Makefile，这里向 CMake 传递了一个参数 `XXX_ARG` 它的值为 `XXX_VAL`，其中的 `..` 这表示源码位于上一层目录，变量 `CMAKE_SOURCE_DIR` 表示源码顶层目录，而 `CMAKE_BINARY_DIR` 表示构建所在的目录，通常是指 **build/** 目录；
+3. 命令行位于 **build/** 文件夹，输入 `make` 开始编译。

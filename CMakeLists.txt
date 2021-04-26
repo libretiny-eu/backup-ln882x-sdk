@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION  3.0.0)
 
 message(STATUS "USER_PROJECT: ${USER_PROJECT}")
 
+# Setup cross-compile toolchain
+include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-arm-none-eabi.cmake)
+include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/target-def.cmake)
+
 # 此命令会设置 PROJECT_NAME 和 CMAKE_PROJECT_NAME 变量
 project(${USER_PROJECT}
   VERSION   1.0.0
@@ -17,10 +21,11 @@ set(EXECUTABLE_OUTPUT_PATH  ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH  ${CMAKE_BINARY_DIR}/lib)
 
 # default makefile verbose is OFF
-# set(CMAKE_VERBOSE_MAKEFILE ON)
+# set(CMAKE_VERBOSE_MAKEFILE  ON)
+set(CMAKE_COLOR_MAKEFILE    ON)
 
 # NOTE: default build type is Debug
-set(CMAKE_BUILD_TYPE Release)
+# set(CMAKE_BUILD_TYPE Release)
 
 if(NOT  CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE  Debug)
@@ -39,14 +44,14 @@ set(TARGET_ELF_NAME  ${PROJECT_NAME}.elf)
 set(PRO_SOURCE   "")
 set(PRO_INCLUDE  "")
 
-# Setup cross-compile toolchain
-include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-arm-none-eabi.cmake)
-include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/target-def.cmake)
-
 # auto-set variables from user input
 set(MCU_FLAGS   "${MCU}")
+
 set(LINK_FLAGS  "${ARCHFLAGS} -Wl,--gc-sections")
-set(EXTRA_LINK_FLAGS  "-Wl,-Map=${PROJECT_NAME}.map,--cref,--no-warn-mismatch --specs=nano.specs --specs=nosys.specs")
+
+set(EXTRA_LINK_FLAGS  "-Wl,-Map=${PROJECT_NAME}.map,--cref,--no-warn-mismatch \
+    -Wl,--print-memory-usage --specs=nano.specs --specs=nosys.specs"
+)
 include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-flags.cmake)
 
 ########################   update flash partition table   ######################
@@ -83,6 +88,7 @@ option(COMP_SMARTCFG_SUPPORT    "SmartConfig for device network setup."         
 option(COMP_SOFTAPCFG_SUPPORT   "SoftAP for device network setup."              OFF)
 option(COMP_UTILS_SUPPORT       "Utils for misc operations, must be built."     ON)
 option(COMP_QCLOUD_SDK_SUPPORT  "Tencent Qcloud SDK."                           OFF)
+option(COMP_SMARTLIVING_SUPPORT "Ali SmartLiving SDK."                          ON)
 
 ###########################   define module top dir   ##########################
 
@@ -106,6 +112,7 @@ set(COMP_SOFTAPCFG_DIR    ${CMAKE_SOURCE_DIR}/components/smartlink/softapcfg)
 set(COMP_UTILS_DIR        ${CMAKE_SOURCE_DIR}/components/utils)
 set(COMP_WIFI_DIR         ${CMAKE_SOURCE_DIR}/components/wifi)
 set(COMP_QCLOUD_SDK_DIR   ${CMAKE_SOURCE_DIR}/components/qcloud_iot_c_sdk)
+set(COMP_SMARTLIVING_DIR  ${CMAKE_SOURCE_DIR}/components/smartliving_SDK)
 set(COMP_PHONY_DIR        ${CMAKE_SOURCE_DIR}/components/phony)  # NOTE: MUST be built
 
 #############################    user project    ###############################
@@ -161,6 +168,10 @@ endif(COMP_LWIP_SUPPORT)
 if(COMP_QCLOUD_SDK_SUPPORT)
   add_subdirectory(${COMP_QCLOUD_SDK_DIR})
 endif(COMP_QCLOUD_SDK_SUPPORT)
+
+if(COMP_SMARTLIVING_SUPPORT)
+  add_subdirectory(${COMP_SMARTLIVING_DIR})
+endif(COMP_SMARTLIVING_SUPPORT)
 
 if(COMP_MBEDTLS_SUPPORT)
   add_subdirectory(${COMP_MBEDTLS_DIR})

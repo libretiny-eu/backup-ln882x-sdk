@@ -33,7 +33,7 @@ buildPath=${rootPath}/build
 
 function action_clean()
 {
-    echo "start clean"
+    echo "------  clean directory: $buildPath  ------"
     if [ ! -d $buildPath ];then
         mkdir $buildPath
         return
@@ -43,45 +43,39 @@ function action_clean()
 
 function action_config()
 {
-    echo "start config user project = $USER_PROJECT"
-    if [ ! -d $buildPath ];then
-        mkdir $buildPath
+    echo "------  config: $USER_PROJECT  ------"
+    if [ ! -d $buildPath ]; then
+        mkdir  $buildPath
     fi
-    cd $buildPath &&  cmake -DUSER_PROJECT=$USER_PROJECT ..
+    cd $buildPath && cmake -DUSER_PROJECT=$USER_PROJECT -S .. -G "Unix Makefiles"
 }
 
 function action_build()
 {
-    echo "start build user project = $USER_PROJECT"
+    echo "------  build: $USER_PROJECT  ------"
     if [ ! -d $buildPath ];then
         mkdir $buildPath
-        cd $buildPath &&  cmake -DUSER_PROJECT=$USER_PROJECT ..
+        cmake -DUSER_PROJECT=$USER_PROJECT -S . -B $buildPath -G "Unix Makefiles"
     fi
-    # cd $buildPath && make 1>../info.log 2>../warn.log
-    cd $buildPath &&  make -j4
+    cd $buildPath && make -j4
 }
 
 # config && build
 function action_rebuild()
 {
-    echo "start rebuild user project = $USER_PROJECT"
+    echo "------  rebuild: $USER_PROJECT  ------"
     if [ ! -d  $buildPath ]; then
         mkdir $buildPath
     fi
+
     rm -rf $buildPath/*
-    cd $buildPath &&  cmake -DUSER_PROJECT=$USER_PROJECT .. && make -j4
+
+    cd $buildPath &&  cmake -DUSER_PROJECT=$USER_PROJECT .. && make
 }
 
 function action_jflash()
 {
-    echo "start jflash"
-    cd $buildPath &&  make jlink_flash
-}
-
-function action_gdbserver()
-{
-    echo "start gdbserver"
-    cd $buildPath &&  make jlink_gdbserver
+    echo "!!!  Dowloading via J-Flash is not supported yet  !!!"
 }
 
 function action_usage()
@@ -93,7 +87,6 @@ function action_usage()
 }
 
 if [ "$#" -eq 0 ]; then
-    action_clean
     action_usage
 elif [ "$USER_ACTION" = "clean" ]; then
     action_clean
@@ -105,8 +98,6 @@ elif [ "$USER_ACTION" = "rebuild" ]; then
     action_rebuild
 elif [ "$USER_ACTION" = "jflash" ]; then
     action_jflash
-elif [ "$USER_ACTION" = "gdbserver" ]; then
-    action_gdbserver
 else
     action_usage
 fi

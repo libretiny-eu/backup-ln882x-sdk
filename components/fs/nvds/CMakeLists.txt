@@ -7,6 +7,11 @@ set(nvds_static_target "nvds")
 add_library(${nvds_static_target} STATIC ${NVDS_SRC})
 add_library(components::fs::nvds ALIAS ${nvds_static_target})
 
+target_link_libraries(${nvds_static_target}
+    PUBLIC
+    components::phony
+)
+
 target_include_directories(${nvds_static_target}
     PUBLIC
     ${COMP_NVDS_DIR}

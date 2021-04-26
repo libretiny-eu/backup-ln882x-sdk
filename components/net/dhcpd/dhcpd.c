@@ -486,7 +486,7 @@ int do_request(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
     }
 
     //2. lookup the allocate IP by OFFER phase.
-    if(DHCPD_ERR_NONE != dhcpd_ip_allocate(dhcpd->ip_pool, (char *)client_mac, &alloc_ipaddr, LN_FALSE)) {
+    if(DHCPD_ERR_NONE != dhcpd_ip_allocate(dhcpd->ip_pool, (char *)client_mac, &alloc_ipaddr, LN_TRUE)) {
         DHCPD_ERR("Cannot assign IP address!\r\n");
         return LN_FALSE;
     }
@@ -496,6 +496,7 @@ int do_request(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
         DHCPD_ERR("REQUEST: Confirm ip is not the allocate IP by OFFER phase,send NAK msg to client!\r\n");
         dhcp_msg_type = DHCP_NAK;
         memset(confirm_ipaddr, 0, 4);
+        dhcpd_ip_release((char *)client_mac);
     }
 
     //bootp

@@ -12,6 +12,11 @@ set(kv_static_target "kv")
 add_library(${kv_static_target} STATIC ${KV_SRC})
 add_library(components::fs::kv ALIAS ${kv_static_target})
 
+target_link_libraries(${kv_static_target}
+    PUBLIC
+    components::phony
+)
+
 target_include_directories(${kv_static_target}
     PUBLIC
     ${COMP_KV_DIR}/kv
