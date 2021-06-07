@@ -98,6 +98,10 @@ int dhcpd_parse_option(uint8_t *packet, uint16_t packet_len, dhcp_option_t *opti
                 break;
          }
     }
+
+    if (option->value == NULL) {
+        return LN_FALSE;
+    }
     return LN_TRUE;
 }
 

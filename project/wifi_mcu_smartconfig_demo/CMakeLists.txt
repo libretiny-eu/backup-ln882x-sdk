@@ -17,6 +17,15 @@ add_executable(${pro_executable_target}  ${PRO_SRC})
 set(COMP_ATCMD_SUPPORT      ON  PARENT_SCOPE)
 set(COMP_SMARTCFG_SUPPORT   ON  PARENT_SCOPE)
 
+#--------------------------  systemview  settings  -----------------------------
+set(USER_SYSTEMVIEW_SUPPORT         OFF)
+if(USER_SYSTEMVIEW_SUPPORT)
+    set(COMP_SYSTEMVIEW_SUPPORT     ON  PARENT_SCOPE) # global variable -- ON
+    add_definitions(-DSYSTEMVIEW_ENABLED)
+    set(EXTRA_LIB   ${EXTRA_LIB}  components::systemview)
+endif(USER_SYSTEMVIEW_SUPPORT)
+
+
 target_link_libraries(${pro_executable_target}
     PUBLIC
     components::smartlink::smartcfg
@@ -27,6 +36,7 @@ target_link_libraries(${pro_executable_target}
     components::atcmd
     components::serial
     components::phony
+    ${EXTRA_LIB}
     driver_ln882x
     -lc -lm -lnosys
 

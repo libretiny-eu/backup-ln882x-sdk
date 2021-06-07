@@ -25,4 +25,5 @@ target_include_directories(${airkiss_static_target}
     ${COMP_UTILS_DIR}
     ${COMP_QCLOUD_SDK_DIR}/include
     ${COMP_QCLOUD_SDK_DIR}/include/exports
+    ${EXTRA_INCLUDE_PATH}
 )

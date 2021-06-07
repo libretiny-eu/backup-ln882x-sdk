@@ -12,6 +12,8 @@
 #include "flash_partition_table.h"
 #include "utils/reboot_trace/reboot_trace.h"
 #include "utils/runtime/runtime.h"
+#include "SEGGER_SYSVIEW.h"
+
 #if BLE_SUPPORT==ENABLE
 #include "ble/ble_task.h"
 #include "ble/mg_api.h"
@@ -44,8 +46,10 @@ int main (int argc, char* argv[])
 
     //LOG(LOG_LVL_INFO, "chip reboot cause = %d!\r\n",(int)reboot_cause);
 
-    cm_backtrace_init("wifi_mcu_develop", "HW_V1.0", "SW_V1.0");
+    cm_backtrace_init("wifi_mcu_basic_example", "HW_V1.0", "SW_V1.0");
     LOG(LOG_LVL_INFO, "------  wifi_mcu_basic_example  ------\r\n");
+
+    SEGGER_SYSVIEW_Conf();
 
     if (KV_ERR_NONE != ln_kv_port_init(KV_SPACE_OFFSET, (KV_SPACE_OFFSET + KV_SPACE_SIZE))) {
         LOG(LOG_LVL_ERROR, "KV init filed!\r\n");

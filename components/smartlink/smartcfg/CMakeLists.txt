@@ -23,4 +23,5 @@ target_include_directories(${smartcfg_static_target}
     ${COMP_LWIP_DIR}/include
     ${COMP_LWIP_DIR}/port
     ${COMP_UTILS_DIR}
+    ${EXTRA_INCLUDE_PATH}
 )

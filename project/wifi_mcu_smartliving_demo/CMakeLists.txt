@@ -26,7 +26,9 @@ set(pro_executable_target  ${TARGET_ELF_NAME})
 
 add_executable(${pro_executable_target}  ${PRO_SRC})
 
-set(COMP_ATCMD_SUPPORT  ON  PARENT_SCOPE)
+set(COMP_ATCMD_SUPPORT          ON  PARENT_SCOPE)
+set(COMP_SMARTLIVING_SUPPORT    ON  PARENT_SCOPE)
+
 
 # NOTE: wifi library must be placed before utils library.
 target_link_libraries(${pro_executable_target}

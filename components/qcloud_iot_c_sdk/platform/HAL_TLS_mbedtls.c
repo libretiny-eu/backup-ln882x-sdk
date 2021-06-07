@@ -19,7 +19,7 @@ extern "C" {
 
 #include "qcloud_iot_import.h"
 
-#ifndef AUTH_WITH_NOTLS 
+#ifndef AUTH_WITH_NOTLS
 
 #include <stdint.h>
 #include <string.h>
@@ -28,6 +28,12 @@ extern "C" {
 #include "qcloud_iot_export_error.h"
 #include "qcloud_iot_export_log.h"
 #include "utils_param_check.h"
+
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
 
 #include "mbedtls/ssl.h"
 #include "mbedtls/entropy.h"
@@ -40,7 +46,7 @@ extern "C" {
 #ifndef AUTH_MODE_CERT
 static const int ciphersuites[] = { MBEDTLS_TLS_PSK_WITH_AES_128_CBC_SHA, MBEDTLS_TLS_PSK_WITH_AES_256_CBC_SHA, 0 };
 #endif
-    
+
 /**
  * @brief data structure for mbedtls SSL connection
  */
@@ -81,11 +87,11 @@ typedef struct {
 
 static void my_debug(void *ctx, int level, const char *file, int line, const char *str)
 {
-	printf("[MBEDTLS]%s:%d: %s\n\r", file, line, str);
+	Log_e("[MBEDTLS]%s:%d: %s\n\r", file, line, str);
 }
 /********************** RTK8710 porting *****************************/
 
- 
+
 /**
  * @brief free memory/resources allocated by mbedtls
  */
@@ -96,13 +102,13 @@ static void _free_mebedtls(TLSDataParams *pParams)
     mbedtls_x509_crt_free(&(pParams->client_cert));
     mbedtls_x509_crt_free(&(pParams->ca_cert));
     mbedtls_pk_free(&(pParams->private_key));
-#endif	
+#endif
     mbedtls_ssl_free(&(pParams->ssl));
     mbedtls_ssl_config_free(&(pParams->ssl_conf));
-#if defined(MBEDTLS_CTR_DRBG_C)    
+#if defined(MBEDTLS_CTR_DRBG_C)
     mbedtls_ctr_drbg_free(&(pParams->ctr_drbg));
     mbedtls_entropy_free(&(pParams->entropy));
-#endif    
+#endif
     HAL_Free(pParams);
 }
 
@@ -121,8 +127,8 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
 
     int ret = QCLOUD_RET_SUCCESS;
 
-//    mbedtls_platform_set_calloc_free(HAL_Calloc, HAL_Free);    
-    
+//    mbedtls_platform_set_calloc_free(HAL_Calloc, HAL_Free);
+
     mbedtls_net_init(&(pDataParams->socket_fd));
     mbedtls_ssl_init(&(pDataParams->ssl));
     mbedtls_ssl_config_init(&(pDataParams->ssl_conf));
@@ -131,15 +137,15 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
     mbedtls_debug_set_threshold( 0 );
     mbedtls_ssl_conf_dbg(&(pDataParams->ssl_conf), my_debug, NULL);
 #endif
-    
+
 #if defined(MBEDTLS_CTR_DRBG_C)
     mbedtls_ctr_drbg_init(&(pDataParams->ctr_drbg));
 #endif
-#if defined(MBEDTLS_X509_USE_C)	
+#if defined(MBEDTLS_X509_USE_C)
     mbedtls_x509_crt_init(&(pDataParams->ca_cert));
     mbedtls_x509_crt_init(&(pDataParams->client_cert));
     mbedtls_pk_init(&(pDataParams->private_key));
-#endif		
+#endif
 
 #if defined(MBEDTLS_CTR_DRBG_C)
     mbedtls_entropy_init(&(pDataParams->entropy));
@@ -149,9 +155,9 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
         Log_e("mbedtls_ctr_drbg_seed failed returned 0x%04x", ret<0?-ret:ret);
         return QCLOUD_ERR_SSL_INIT;
     }
-#endif                                     
+#endif
 
-#if defined(MBEDTLS_X509_USE_C)    
+#if defined(MBEDTLS_X509_USE_C)
     if (pConnectParams->ca_crt != NULL)
     {
         if ((ret = mbedtls_x509_crt_parse(&(pDataParams->ca_cert), (const unsigned char *)pConnectParams->ca_crt,
@@ -160,7 +166,7 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
             return QCLOUD_ERR_SSL_CERT;
         }
     }
-#endif	
+#endif
 
 #ifdef AUTH_MODE_CERT
     if (pConnectParams->cert_file != NULL && pConnectParams->key_file != NULL) {
@@ -184,7 +190,7 @@ static int _mbedtls_client_init(TLSDataParams *pDataParams, TLSConnectParams *pC
     } else {
         Log_d("psk/pskid is empty!|psk=%s|psd_id=%s", pConnectParams->psk, pConnectParams->psk_id);
     }
-	
+
 	if (0 != ret) {
 		Log_e("mbedtls_ssl_conf_psk fail: 0x%x", ret<0?-ret:ret);
 		return ret;
@@ -250,17 +256,17 @@ uintptr_t HAL_TLS_Connect(TLSConnectParams *pConnectParams, const char *host, in
     int ret = 0;
 
     Log_i("Before TLS connect, free heap size: %d", xPortGetFreeHeapSize());
-    
+
     TLSDataParams * pDataParams = (TLSDataParams *)HAL_Malloc(sizeof(TLSDataParams));
     if (pDataParams == NULL) {
         Log_e("TLSDataParams malloc failed!");
         return 0;
     }
-    
+
     if ((ret = _mbedtls_client_init(pDataParams, pConnectParams)) != QCLOUD_RET_SUCCESS) {
         goto error;
-    }    
-    
+    }
+
     Log_d("Setting up the SSL/TLS structure...");
     if ((ret = mbedtls_ssl_config_defaults(&(pDataParams->ssl_conf), MBEDTLS_SSL_IS_CLIENT,
                                            MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT)) != 0) {
@@ -311,7 +317,7 @@ uintptr_t HAL_TLS_Connect(TLSConnectParams *pConnectParams, const char *host, in
         Log_e("mbedtls_ssl_set_hostname failed returned 0x%04x", ret<0?-ret:ret);
         goto error;
     }
-	
+
 #endif
 
     mbedtls_ssl_set_bio(&(pDataParams->ssl), &(pDataParams->socket_fd), mbedtls_net_send, mbedtls_net_recv,
@@ -326,12 +332,12 @@ uintptr_t HAL_TLS_Connect(TLSConnectParams *pConnectParams, const char *host, in
     while ((ret = mbedtls_ssl_handshake(&(pDataParams->ssl))) != 0) {
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
             Log_e("mbedtls_ssl_handshake failed returned 0x%04x", -ret);
-			
-#if defined(MBEDTLS_X509_USE_C)			
+
+#if defined(MBEDTLS_X509_USE_C)
             if (ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED) {
                 Log_e("Unable to verify the server's certificate");
             }
-#endif			
+#endif
             goto error;
         }
     }
@@ -369,13 +375,13 @@ void HAL_TLS_Disconnect(uintptr_t handle) {
     mbedtls_x509_crt_free(&(pParams->ca_cert));
     mbedtls_pk_free(&(pParams->private_key));
 #endif
-    
+
     mbedtls_ssl_free(&(pParams->ssl));
     mbedtls_ssl_config_free(&(pParams->ssl_conf));
-#if defined(MBEDTLS_CTR_DRBG_C)    
+#if defined(MBEDTLS_CTR_DRBG_C)
     mbedtls_ctr_drbg_free(&(pParams->ctr_drbg));
     mbedtls_entropy_free(&(pParams->entropy));
-#endif    
+#endif
     HAL_Free((void *)handle);
 }
 
@@ -388,7 +394,7 @@ int HAL_TLS_Write(uintptr_t handle, unsigned char *msg, size_t totalLen, uint32_
     size_t written_so_far;
     bool errorFlag = false;
     int write_rc = 0;
-    
+
     TLSDataParams *pParams = (TLSDataParams *)handle;
 
     for (written_so_far = 0; written_so_far < totalLen && !expired(&timer); written_so_far += write_rc) {
@@ -418,7 +424,7 @@ int HAL_TLS_Write(uintptr_t handle, unsigned char *msg, size_t totalLen, uint32_
     return QCLOUD_RET_SUCCESS;
 }
 
-int HAL_TLS_Read(uintptr_t handle, unsigned char *msg, size_t totalLen, uint32_t timeout_ms, size_t *read_len) 
+int HAL_TLS_Read(uintptr_t handle, unsigned char *msg, size_t totalLen, uint32_t timeout_ms, size_t *read_len)
 {
     //mbedtls_ssl_conf_read_timeout(&(pParams->ssl_conf), timeout_ms); TODO:this cause read blocking and no return even timeout
     // use non-blocking read
@@ -426,7 +432,7 @@ int HAL_TLS_Read(uintptr_t handle, unsigned char *msg, size_t totalLen, uint32_t
     InitTimer(&timer);
     countdown_ms(&timer, (unsigned int) timeout_ms);
     *read_len = 0;
-    
+
     TLSDataParams *pParams = (TLSDataParams *)handle;
 
     do {
@@ -462,4 +468,4 @@ int HAL_TLS_Read(uintptr_t handle, unsigned char *msg, size_t totalLen, uint32_t
 }
 #endif
 
-#endif 
+#endif

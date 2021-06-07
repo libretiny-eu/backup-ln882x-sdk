@@ -94,7 +94,7 @@ goto:eof
         echo "Please config first!!!"
         goto:eof
     )
-    cmake --build  %buildPath% --parallel 8
+    cmake --build  %buildPath% --parallel 4
 goto:eof
 
 ::------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ goto:eof
         del /s /q %buildPath%
     )
     cmake -DUSER_PROJECT=%USER_PROJECT% -S . -B %buildPath%  -G "Unix Makefiles"
-    cmake --build  %buildPath% --parallel 8
+    cmake --build  %buildPath% --parallel 4
 goto:eof
 
 ::------------------------------------------------------------------------------
@@ -116,6 +116,7 @@ goto:eof
     echo "------  download flashimage.bin via jflash  ------"
     echo "!!! Do NOT save changes to J-Flash project after downloading !!!"
     %cwd%tools/JFlash/JFlash.exe -openprj%cwd%/tools/JFlash/LN881x.jflash ^
-        -open%buildPath%/bin/flashimage.bin,0  -erasechip -programverify
+        -open%buildPath%/bin/flashimage.bin,0  ^
+        -erasechip -programverify -startapp -exit
     echo "------  reset the chip and the code starts running...  ------"
 goto:eof

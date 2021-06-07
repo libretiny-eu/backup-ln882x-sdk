@@ -6,7 +6,8 @@
 #include "wifi/wifi.h"
 #include "wifi_manager.h"
 #include "lwip/tcpip.h"
-//#include "tcp_server_echo.h"
+
+#include "SEGGER_SYSVIEW.h"
 
 #include "wifi_setup.h"
 #include "ota_mqtt_example.h"
@@ -27,7 +28,7 @@
 #if (MQTT_SAMPLE == RUN_SAMPLE_TYPE)
 #define USR_APP_TASK_STACK_SIZE      (1024 * 4) //Byte
 #elif (LIGHT_SCENARY_SAMPLE == RUN_SAMPLE_TYPE)
-#define USR_APP_TASK_STACK_SIZE      (1024 * 14) //Byte
+#define USR_APP_TASK_STACK_SIZE      (1024 * 22) //Byte
 #else
 #define USR_APP_TASK_STACK_SIZE      (1024 * 14) //Byte
 #endif
@@ -41,8 +42,10 @@ void usr_app_task_entry(void *params)
 {
     IOT_Log_Set_Level(eLOG_DEBUG);
 
-    setup_wifi_via_airkiss();
-    //setup_wifi_via_softap(); // OK
+    SEGGER_SYSVIEW_PrintfHost("setup network");
+
+    // setup_wifi_via_airkiss();
+    setup_wifi_via_softap(); // OK
     // setup_wifi_via_smartconfig(); // OK
     // setup_wifi_direct(); // OK
 
@@ -60,8 +63,11 @@ void usr_app_task_entry(void *params)
         mqtt_demo(true);
     }
 
+    uint32_t idle_cnt = 0;
     while (1) {
-        OS_MsDelay(200);
+        OS_MsDelay(1000);
+        LOG(LOG_LVL_INFO, "idle (%u)\r\n", idle_cnt++);
+        SEGGER_SYSVIEW_PrintfHost("idle (%u)\r\n", idle_cnt++);
     }
 }
 

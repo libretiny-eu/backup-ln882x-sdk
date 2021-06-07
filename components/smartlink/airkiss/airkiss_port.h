@@ -19,8 +19,5 @@ void  ak_port_wifi_channel_hop_stop(void);
 void  ak_port_wifi_sniffer_enable(void * callback);
 void  ak_port_wifi_sniffer_disable(void);
 int   ak_port_udp_send_ack(uint8_t random);
-int   ak_port_recv_reply_token(void);
-
-airkiss_token_info_t* ak_port_get_token(void);
 
 #endif /* __LN_AIRKISS_PORT_H__ */

@@ -29,7 +29,7 @@ void wifi_init_sta(void)
     wifi_config_t wifi_config = {
         .sta = {
             .ssid     = "TP-LINK_479A64",
-            .password = "",
+            .password = "12345678",
             0,
         },
     };

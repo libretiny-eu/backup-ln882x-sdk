@@ -44,4 +44,5 @@ target_include_directories(${kernel_static_target}
     ${MCU_LN882X_DIR}/ln88xx
     ${MCU_LN882X_DIR}/CMSIS_5.3.0
     ${CMAKE_SOURCE_DIR}/components
+    ${EXTRA_INCLUDE_PATH}
 )

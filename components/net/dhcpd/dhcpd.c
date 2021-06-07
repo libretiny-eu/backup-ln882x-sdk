@@ -62,9 +62,9 @@ static void dhcpd_task( void *pvParameters )
     fd_set read_set;
     struct timeval timeout;
     socklen_t addr_len = sizeof(struct sockaddr_in);
-    
+
     timeout.tv_sec  = 0;
-    timeout.tv_usec = 100*1000;//units:us
+    timeout.tv_usec = 50*1000;//units:us
 
     if((dhcpd->dhcp_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {//216Byte
         DHCPD_ERR("Cannot open the socket!\r\n");
@@ -94,8 +94,8 @@ static void dhcpd_task( void *pvParameters )
     msg->sockaddr_from.sin_port = htons(server_config->port);
     msg->sockaddr_from.sin_addr.s_addr = htonl(INADDR_ANY);
     msg->socket_fd = dhcpd->dhcp_socket;
-    
-    while(1)
+
+    while(dhcpd->flag)
     {
         FD_ZERO(&read_set);
         FD_SET(dhcpd->dhcp_socket, &read_set);
@@ -145,18 +145,32 @@ out:
         dhcpd_close_socket(&dhcpd->dhcp_socket);
     }
 	DHCPD_PRINTF("dhcpd_task exit!\r\n");
+
+    if (dhcpd->msg.recv_buff != NULL) {
+        OS_Free(dhcpd->msg.recv_buff);
+        dhcpd->msg.recv_buff = NULL;
+    }
+
+    if (dhcpd->msg.send_buff != NULL) {
+        OS_Free(dhcpd->msg.send_buff);
+        dhcpd->msg.send_buff = NULL;
+    }
+
     OS_ThreadDelete(&(dhcpd->dhcpd_thr));
+    OS_ThreadSetInvalid( &(dhcpd->dhcpd_thr) );
     return;
 }
 
 int dhcpd_start(void)
 {
     dhcpd_ctrl_t *dhcpd = dhcpd_get_handle();
-    
+
+    // DHCPD_ERR("------  DHCP START  ------\r\n");
+
     //TODO:
     extern int system_parameter_get_dhcpd_config(server_config_t *server_config);
     system_parameter_get_dhcpd_config(&(dhcpd->server_config));
-    
+
     server_config_t * server_config = &(dhcpd->server_config);
     dhcpd_ip_item_t *ip_item = NULL;
     uint8_t ip_addr1, ip_addr2, ip_addr3, ip_addr4;
@@ -206,22 +220,12 @@ int dhcpd_start(void)
 int dhcpd_stop(void)
 {
     dhcpd_ctrl_t *dhcpd = dhcpd_get_handle();
-    
+
     if(dhcpd->flag == LN_TRUE)
     {
-        OS_ThreadDelete(&(dhcpd->dhcpd_thr));
-        if (dhcpd->dhcp_socket >= 0) {
-            dhcpd_close_socket(&dhcpd->dhcp_socket);
-        }
-        if (dhcpd->msg.recv_buff != NULL) {
-            OS_Free(dhcpd->msg.recv_buff);
-            dhcpd->msg.recv_buff = NULL;
-        }
-        if (dhcpd->msg.send_buff != NULL) {
-            OS_Free(dhcpd->msg.send_buff);
-            dhcpd->msg.send_buff = NULL;
-        }
         dhcpd->flag = LN_FALSE;
+        // DHCPD_ERR("------  DHCP STOP  ------\r\n");
+        OS_MsDelay(60);
     }
     return DHCPD_ERR_NONE;
 }
@@ -265,7 +269,7 @@ void dhcpd_handle_msg(struct raw_msg *msg)
     if (LN_TRUE != dhcpd_dispatch(msg, &send_pkt_len, DHCP_MAX_MTU)) {
         return;
     }
-    
+
     DHCPD_PRINTF("\r\n+------Dump BOOTP (Send to Client)-----\r\n");
     dhcpd_packet_printf((struct dhcp_packet *)msg->send_buff);
     DHCPD_PRINTF("+--------------------------------------------\r\n\r\n");
@@ -397,7 +401,7 @@ int do_discover(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
     optionptr[offset++] = 4;
     dhcpd_htonl_copy(&optionptr[offset], (server_config->lease >> 1));//RFC 2132 T1=lease_time*50%
     offset += 4;
-    
+
     //rebind time
     optionptr[offset++] = DHO_DHCP_REBINDING_TIME;
     optionptr[offset++] = 4;
@@ -468,6 +472,7 @@ int do_request(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
     uint8_t *client_mac = &request->chaddr[0];
 
     //1. get confirm ip from REQUEST Packet.
+    option.value = NULL; /* Must init as NULL */
     option.code = DHO_DHCP_REQUESTED_ADDRESS;
     if (LN_TRUE == dhcpd_parse_option((uint8_t *)request, msg->recv_len, &option)) {
         memcpy(confirm_ipaddr, option.value, 4);
@@ -550,7 +555,7 @@ int do_request(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
         optionptr[offset++] = 4;
         dhcpd_htonl_copy(&optionptr[offset], (server_config->lease >> 1));//RFC 2132 T1=lease_time*50%
         offset += 4;
-        
+
         //rebind time
         optionptr[offset++] = DHO_DHCP_REBINDING_TIME;
         optionptr[offset++] = 4;
@@ -671,7 +676,7 @@ int do_inform(struct raw_msg *msg, uint16_t *send_pkt_len, uint16_t max_mtu)
     optionptr[offset++] = 4;
     dhcpd_htonl_copy(&optionptr[offset], (server_config->lease >> 1));//RFC 2132 T1=lease_time*50%
     offset += 4;
-    
+
     //rebind time
     optionptr[offset++] = DHO_DHCP_REBINDING_TIME;
     optionptr[offset++] = 4;

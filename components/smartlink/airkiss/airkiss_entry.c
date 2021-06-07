@@ -115,17 +115,3 @@ int airkiss_send_ack(void)
     }
     return AK_TRUE;
 }
-
-
-int airkiss_recv_and_reply_token(void)
-{
-    if (AK_TRUE != ak_port_recv_reply_token()) {
-        return AK_FALSE;
-    }
-    return AK_TRUE;
-}
-
-airkiss_token_info_t* airkiss_get_token(void)
-{
-    return ak_port_get_token();
-}

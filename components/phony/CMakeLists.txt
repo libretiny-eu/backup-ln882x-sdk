@@ -58,4 +58,5 @@ target_include_directories(${phony_static_target}
     ${COMP_KV_DIR}/kv
     ${COMP_KV_DIR}/kv_port
     ${COMP_ATCMD_DIR}
+    ${EXTRA_INCLUDE_PATH}
 )

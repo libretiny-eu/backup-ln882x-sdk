@@ -28,9 +28,6 @@ int       airkiss_is_complete(void);
 uint8_t * airkiss_get_ssid(void);
 uint8_t * airkiss_get_pwd(void);
 int       airkiss_send_ack(void);
-int       airkiss_recv_and_reply_token(void);
-airkiss_token_info_t* airkiss_get_token(void);
-
 
 #endif /* __LN_AIRKISS_ENTRY_H__ */
 

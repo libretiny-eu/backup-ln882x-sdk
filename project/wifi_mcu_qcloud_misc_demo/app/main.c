@@ -15,6 +15,8 @@
 #include "utils/reboot_trace/reboot_trace.h"
 #include "utils/runtime/runtime.h"
 
+#include "SEGGER_SYSVIEW.h"
+
 #if BLE_SUPPORT==ENABLE
 #include "ble/ble_task.h"
 #include "ble/mg_api.h"
@@ -48,6 +50,8 @@ int main (int argc, char* argv[])
     cm_backtrace_init("wifi_mcu_qcloud_misc_demo", "HW_V1.0", "SW_V1.0");
     LOG(LOG_LVL_INFO, "------  wifi_mcu_qcloud_misc_demo  ------\r\n");
 
+    SEGGER_SYSVIEW_Conf();
+    
     if (KV_ERR_NONE != ln_kv_port_init(KV_SPACE_OFFSET, (KV_SPACE_OFFSET + KV_SPACE_SIZE))) {
         LOG(LOG_LVL_ERROR, "KV init filed!\r\n");
     }

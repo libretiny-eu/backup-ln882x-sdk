@@ -32,4 +32,5 @@ target_include_directories(${qcloud_static_target}
     ${COMP_MBEDTLS_DIR}/include
     ${CMAKE_SOURCE_DIR}/components
     ${COMP_UTILS_DIR}
+    ${EXTRA_INCLUDE_PATH}
 )

@@ -225,4 +225,5 @@ target_include_directories(${lwip_static_target}
     ${COMP_KERNEL_DIR}/FreeRTOS/Source/include
     ${COMP_KERNEL_DIR}/FreeRTOS/Source/portable/GCC/ARM_CM4F
     ${CMAKE_SOURCE_DIR}/components
+    ${EXTRA_INCLUDE_PATH}
 )

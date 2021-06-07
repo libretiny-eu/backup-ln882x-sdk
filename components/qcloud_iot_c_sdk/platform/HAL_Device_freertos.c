@@ -31,7 +31,7 @@
   static char sg_product_id[MAX_SIZE_OF_PRODUCT_ID + 1]	 = "DFK2GJBO5I";//"PRODUCT_ID";
 
   /* device name */
-  static char sg_device_name[MAX_SIZE_OF_DEVICE_NAME + 1]  = "light002";//"YOUR_DEV_NAME";
+  static char sg_device_name[MAX_SIZE_OF_DEVICE_NAME + 1]  = "light003";//"YOUR_DEV_NAME";
 
   #ifdef AUTH_MODE_CERT
     /* public cert file name of certificate device */
@@ -40,7 +40,7 @@
     static char sg_device_privatekey_file_name[MAX_SIZE_OF_DEVICE_SECRET_FILE_NAME + 1] = "YOUR_DEVICE_NAME_private.key";
   #else
     /* device secret of PSK device */
-    static char sg_device_secret[MAX_SIZE_OF_DEVICE_SECRET + 1] = "fJrF9cPeKcO17o10FR9D/Q==";//"YOUR_IOT_PSK";
+    static char sg_device_secret[MAX_SIZE_OF_DEVICE_SECRET + 1] = "P19HAQMhXpS6AVIbNraztw==";//"YOUR_IOT_PSK";
   #endif
 
   #ifdef DEV_DYN_REG_ENABLED

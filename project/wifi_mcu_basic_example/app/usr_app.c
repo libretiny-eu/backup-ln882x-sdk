@@ -15,6 +15,8 @@
 #include "hal/hal_adc.h"
 #include "ln_kv_api.h"
 
+#include "SEGGER_SYSVIEW.h"
+
 static OS_Thread_t g_usr_app_thread;
 #define USR_APP_TASK_STACK_SIZE   6*256 //Byte
 
@@ -230,10 +232,12 @@ void usr_app_task_entry(void *params)
     LOG(LOG_LVL_INFO, "mask = %s \r\n", ip4addr_ntoa(&ip_info.netmask));
     LOG(LOG_LVL_INFO, "gateway = %s \r\n", ip4addr_ntoa(&ip_info.gw));
 
+    uint32_t idle_cnt = 0;
     while(1)
     {
         OS_MsDelay(1000);
         //LOG(LOG_LVL_ERROR, "usr_app_task_entry()\r\n");
+        SEGGER_SYSVIEW_ErrorfHost("idle cnt = %d", idle_cnt++);
     }
 }
 

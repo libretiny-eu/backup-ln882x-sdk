@@ -22,4 +22,5 @@ target_include_directories(${softapcfg_static_target}
     ${COMP_LWIP_DIR}/port
     ${COMP_DHCPD_DIR}
     ${COMP_UTILS_DIR}
+    ${EXTRA_INCLUDE_PATH}
 )

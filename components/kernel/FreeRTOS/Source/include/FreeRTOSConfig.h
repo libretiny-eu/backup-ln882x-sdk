@@ -85,6 +85,7 @@
 
 /* Ensure stdint is only used by the compiler, and not the assembler. */
 #include "proj_config.h"
+#include "SEGGER_SYSVIEW_FreeRTOS.h"
 
 #define TASK_RUN_MONITOR				0
 

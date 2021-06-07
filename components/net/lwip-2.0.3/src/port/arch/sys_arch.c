@@ -45,7 +45,7 @@
 #if (NO_SYS == 0)
     #if (defined(__GNUC__) && !defined(__CC_ARM))
         extern int errno;
-    #else defined(__CC_ARM)
+    #elif defined(__CC_ARM)
         int errno;
     #endif
 

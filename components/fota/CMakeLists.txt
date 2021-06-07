@@ -17,4 +17,5 @@ target_link_libraries(${fota_static_target}
 target_include_directories(${fota_static_target}
     PUBLIC
     ${COMP_FOTA_DIR}/ota_agent
+    ${COMP_PARTMGR_DIR}
 )

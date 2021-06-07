@@ -43,7 +43,6 @@
 #define FULL_ASSERT                           ENABLE
 
 #define PRINTF_OMIT                           DISABLE     // when release software, set 1 to omit all printf logs
-#define PRINT_TO_RTT                          DISABLE     // 1: print to segger rtt   0: print to uart1
 
 #define WIFI_TRACK                            DISABLE     // enable when for wifi locate apply
 #define AT_LOG_MERGE_TO_UART0                 DISABLE     // LOG and AT both use UART0

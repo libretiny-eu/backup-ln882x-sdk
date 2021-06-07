@@ -26,6 +26,9 @@
 #include "data_template_client.h"
 #include "utils/cJSON.h"
 #include "airkiss_entry.h"
+#include "airkiss_port_qcloud.h"
+
+#include "SEGGER_SYSVIEW.h"
 
 #ifdef AUTH_MODE_CERT
 static char sg_cert_file[PATH_MAX + 1];  // full path of device cert file
@@ -303,44 +306,54 @@ static void event_handler(void *pclient, void *handle_context, MQTTEventMsg *msg
     switch (msg->event_type) {
         case MQTT_EVENT_UNDEF:
             Log_i("undefined event occur.");
+            SEGGER_SYSVIEW_WarnfHost("undefined event occur.");
             break;
 
         case MQTT_EVENT_DISCONNECT:
             Log_i("MQTT disconnect.");
+            SEGGER_SYSVIEW_WarnfHost("MQTT disconnect.");
             break;
 
         case MQTT_EVENT_RECONNECT:
             Log_i("MQTT reconnect.");
+            SEGGER_SYSVIEW_PrintfHost("MQTT reconnect.");
             break;
 
         case MQTT_EVENT_SUBCRIBE_SUCCESS:
             sg_subscribe_event_result = msg->event_type;
             Log_i("subscribe success, packet-id=%u", (unsigned int)packet_id);
+            SEGGER_SYSVIEW_PrintfHost("subscribe success, packet-id=%u", (unsigned int)packet_id);
             break;
 
         case MQTT_EVENT_SUBCRIBE_TIMEOUT:
             sg_subscribe_event_result = msg->event_type;
             Log_i("subscribe wait ack timeout, packet-id=%u", (unsigned int)packet_id);
+            SEGGER_SYSVIEW_WarnfHost("subscribe wait ack timeout, packet-id=%u", (unsigned int)packet_id);
             break;
 
         case MQTT_EVENT_SUBCRIBE_NACK:
             sg_subscribe_event_result = msg->event_type;
             Log_i("subscribe nack, packet-id=%u", (unsigned int)packet_id);
+            SEGGER_SYSVIEW_PrintfHost("subscribe nack, packet-id=%u", (unsigned int)packet_id);
             break;
 
         case MQTT_EVENT_PUBLISH_SUCCESS:
             Log_i("publish success, packet-id=%u", (unsigned int)packet_id);
+            SEGGER_SYSVIEW_PrintfHost("publish success, packet-id=%u", (unsigned int)packet_id);
             break;
 
         case MQTT_EVENT_PUBLISH_TIMEOUT:
             Log_i("publish timeout, packet-id=%u", (unsigned int)packet_id);
+            SEGGER_SYSVIEW_PrintfHost("publish timeout, packet-id=%u", (unsigned int)packet_id);
             break;
 
         case MQTT_EVENT_PUBLISH_NACK:
             Log_i("publish nack, packet-id=%u", (unsigned int)packet_id);
+            SEGGER_SYSVIEW_WarnfHost("publish nack, packet-id=%u", (unsigned int)packet_id);
             break;
         default:
             Log_i("Should NOT arrive here.");
+            SEGGER_SYSVIEW_WarnfHost("Should NOT arrive here.");
             break;
     }
 }
@@ -375,6 +388,7 @@ void downserviceMsgHandler(void *pClient, MQTTMessage *message, void *pUserData)
                 if ( (sg_app_bind_status.bind_token_reply_cnt > 0)
                     && (sg_app_bind_status.bind_device_cnt > 0) ) {
                     sg_app_bind_status.bind_is_ok = 1;
+                    SEGGER_SYSVIEW_PrintfHost("bind status ok");
                 }
             }
             cJSON_Delete(rootObj);
@@ -384,7 +398,8 @@ void downserviceMsgHandler(void *pClient, MQTTMessage *message, void *pUserData)
 
 void downserviceEventHandler(void *pClient, MQTTEventType event_type, void *pUserData)
 {
-    Log_i("event_type = %d\r\n", event_handler);
+    Log_i("event_type = %d\r\n", event_type);
+    SEGGER_SYSVIEW_PrintfHost("event_type = %d\r\n", (int)event_type);
     return;
 }
 
@@ -417,6 +432,7 @@ static int _user_sub_downservice(void *client)
 
     if (0 > IOT_MQTT_Subscribe(pTemplate->mqtt, topic_buf, &subParam)) {
         Log_e("failed to sub $thing/down/service!!!\r\n");
+        SEGGER_SYSVIEW_WarnfHost("failed to sub $thing/down/service!!!\r\n");
         return -1;
     }
 
@@ -506,6 +522,8 @@ static void _usr_init(void *client)
     airkiss_token_info_t *qcloud_token_info = airkiss_get_token();
     if (qcloud_token_info->token_is_valid) {
         _usb_pub_upservice(pTemplate, (const char *)qcloud_token_info->token_string);
+    } else if (NULL != ln_softapcfg_get_token()) {
+        _usb_pub_upservice(pTemplate, (const char *) ln_softapcfg_get_token() );
     } else {
         Log_e("no token is received from mobile device, bind CANNOT be done!!!\r\n");
     }
@@ -603,6 +621,7 @@ static void OnReportReplyCallback(void *pClient, Method method, ReplyAck replyAc
                                   void *pUserdata)
 {
     Log_i("recv report_reply(ack=%d): %s", replyAck, pJsonDocument);
+    SEGGER_SYSVIEW_PrintfTarget("recv report_reply(ack=%d): %s", replyAck, pJsonDocument);
 }
 
 // register data template properties
@@ -639,6 +658,7 @@ static eDataState get_property_state(void *pProperyData)
     return eNOCHANGE;
 }
 
+
 /*set property state, changed or no change*/
 static void set_property_state(void *pProperyData, eDataState state)
 {
@@ -646,6 +666,7 @@ static void set_property_state(void *pProperyData, eDataState state)
 
     for (i = 0; i < TOTAL_PROPERTY_COUNT; i++) {
         if (sg_DataTemplate[i].data_property.data == pProperyData) {
+            SEGGER_SYSVIEW_PrintfHost("set_property_state() index-%d to state-%d", i, (int)state);
             sg_DataTemplate[i].state = state;
             break;
         }
@@ -725,10 +746,14 @@ static void cycle_report(Timer *reportTimer)
     int i;
 
     if (expired(reportTimer)) {
+        SEGGER_SYSVIEW_PrintfHost("cycle_report(), timer expired [%u]", reportTimer->end_time);
         for (i = 0; i < TOTAL_PROPERTY_COUNT; i++) {
             set_property_state(sg_DataTemplate[i].data_property.data, eCHANGED);
             countdown_ms(reportTimer, 5000);
         }
+        SEGGER_SYSVIEW_PrintfHost("cycle_report(), timer update [%u]", reportTimer->end_time);
+    } else {
+        SEGGER_SYSVIEW_WarnfHost("cycle_report(), timer not expired [%u]", reportTimer->end_time);
     }
 }
 
@@ -750,7 +775,7 @@ static int find_wait_report_property(DeviceProperty *pReportDataList[])
             sg_DataTemplate[i].state = eNOCHANGE;
         }
     }
-
+    SEGGER_SYSVIEW_PrintfHost("find_wait_report_property() with [%d]", j);
     return j;
 }
 
@@ -772,7 +797,7 @@ static int _get_sys_info(void *handle, char *pJsonDoc, size_t sizeOfBuffer)
     /*platform info has at least one of module_hardinfo/module_softinfo/fw_ver
      * property*/
     DeviceProperty plat_info[] = {
-        {.key = "module_hardinfo", .type = TYPE_TEMPLATE_STRING, .data = "ESP8266"},
+        {.key = "module_hardinfo", .type = TYPE_TEMPLATE_STRING, .data = "LN8825"},
         {.key = "module_softinfo", .type = TYPE_TEMPLATE_STRING, .data = "V1.0"},
         {.key = "fw_ver", .type = TYPE_TEMPLATE_STRING, .data = QCLOUD_IOT_DEVICE_SDK_VERSION},
         {.key = "imei", .type = TYPE_TEMPLATE_STRING, .data = "11-22-33-44"},
@@ -799,11 +824,14 @@ int light_data_template_demo(void)
     // init log level
     IOT_Log_Set_Level(eLOG_DEBUG);
 
+    ak_port_init();
+
     // init connection
     TemplateInitParams init_params = DEFAULT_TEMPLATE_INIT_PARAMS;
     rc                             = _setup_connect_init_params(&init_params);
     if (rc != QCLOUD_RET_SUCCESS) {
         Log_e("init params err,rc=%d", rc);
+        SEGGER_SYSVIEW_WarnfHost("init params err,rc=%d", rc);
         return rc;
     }
 
@@ -812,6 +840,7 @@ int light_data_template_demo(void)
     rc = _init_log_upload(&init_params);
     if (rc != QCLOUD_RET_SUCCESS) {
         Log_e("init log upload error, rc = %d", rc);
+        SEGGER_SYSVIEW_WarnfHost("init log upload error, rc = %d", rc);
     }
 #endif
 
@@ -820,15 +849,19 @@ int light_data_template_demo(void)
         Log_i("Cloud Device Construct Success");
     } else {
         Log_e("Cloud Device Construct Failed");
+        SEGGER_SYSVIEW_WarnfHost("Cloud Device Construct Failed");
         return QCLOUD_ERR_FAILURE;
     }
 
 #ifdef MULTITHREAD_ENABLED
     if (QCLOUD_RET_SUCCESS != IOT_Template_Start_Yield_Thread(client)) {
         Log_e("start template yield thread fail");
+        SEGGER_SYSVIEW_WarnfHost("start template yield thread fail");
         goto exit;
     }
 #endif
+
+    SEGGER_SYSVIEW_PrintfHost("before _usr_init()");
 
     // usr init
     _usr_init(client);
@@ -863,35 +896,50 @@ int light_data_template_demo(void)
                                               QCLOUD_IOT_MQTT_COMMAND_TIMEOUT);
         if (rc != QCLOUD_RET_SUCCESS) {
             Log_e("Report system info fail, err: %d", rc);
+            SEGGER_SYSVIEW_WarnfHost("Report system info fail, err: %d", rc);
         }
     } else {
         Log_e("Get system info fail, err: %d", rc);
+        SEGGER_SYSVIEW_WarnfHost("Get system info fail, err: %d", rc);
     }
 
     // get the property changed during offline
     rc = IOT_Template_GetStatus_sync(client, QCLOUD_IOT_MQTT_COMMAND_TIMEOUT);
     if (rc != QCLOUD_RET_SUCCESS) {
         Log_e("Get data status fail, err: %d", rc);
+        SEGGER_SYSVIEW_WarnfHost("Get data status fail, err: %d", rc);
     } else {
         Log_d("Get data status success");
+        SEGGER_SYSVIEW_WarnfHost("Get data status success");
     }
 
     // init a timer for cycle report, you could delete it or not for your needs
     InitTimer(&sg_reportTimer);
 
+    SEGGER_SYSVIEW_Print("enter while loop");
+
+    uint32_t iot_yield_cnt = 0;
     while (IOT_Template_IsConnected(client) || rc == QCLOUD_ERR_MQTT_ATTEMPTING_RECONNECT ||
            rc == QCLOUD_RET_MQTT_RECONNECTED || QCLOUD_RET_SUCCESS == rc) {
+
+        SEGGER_SYSVIEW_PrintfHost("iot yield @ %d", iot_yield_cnt++);
+
 #ifndef MULTITHREAD_ENABLED
         rc = IOT_Template_Yield(client, 200);
+        SEGGER_SYSVIEW_PrintfHost("iot yield rc = %d", rc);
+
         if (rc == QCLOUD_ERR_MQTT_ATTEMPTING_RECONNECT) {
             HAL_SleepMs(1000);
+            SEGGER_SYSVIEW_PrintfHost("qcloud try to reconnect, continue...");
             continue;
         } else if (rc != QCLOUD_RET_SUCCESS) {
             Log_e("Exit loop caused of errCode: %d", rc);
+            SEGGER_SYSVIEW_WarnfHost("Exit loop caused of errCode: %d", rc);
         }
 #endif
         /* handle control msg from server */
         if (sg_control_msg_arrived) {
+            SEGGER_SYSVIEW_Print("control msg arrived.");
             deal_down_stream_user_logic(client, &sg_ProductData);
             /* control msg should reply, otherwise server treat device didn't receive
              * and retain the msg which would be get by get status*/
@@ -903,9 +951,11 @@ int light_data_template_demo(void)
             rc = IOT_Template_ControlReply(client, sg_data_report_buffer, sg_data_report_buffersize, &replyPara);
             if (rc == QCLOUD_RET_SUCCESS) {
                 Log_d("Contol msg reply success");
+                SEGGER_SYSVIEW_PrintfHost("Contol msg reply success");
                 sg_control_msg_arrived = false;
             } else {
                 Log_e("Contol msg reply failed, err: %d", rc);
+                SEGGER_SYSVIEW_WarnfHost("Contol msg reply failed, err: %d", rc);
             }
         }
 
@@ -919,12 +969,18 @@ int light_data_template_demo(void)
                                          OnReportReplyCallback, NULL, QCLOUD_IOT_MQTT_COMMAND_TIMEOUT);
                 if (rc == QCLOUD_RET_SUCCESS) {
                     Log_i("data template reporte success");
+                    SEGGER_SYSVIEW_PrintfHost("data template reporte success");
                 } else {
                     Log_e("data template reporte failed, err: %d", rc);
+                    SEGGER_SYSVIEW_WarnfHost("data template reporte failed, err: %d", rc);
                 }
             } else {
                 Log_e("construct reporte data failed, err: %d", rc);
+                SEGGER_SYSVIEW_WarnfHost("construct reporte data failed, err: %d", rc);
             }
+        } else {
+            // Log_e("deal_up_stream_user_logic, failed...\r\n");
+            SEGGER_SYSVIEW_WarnfHost("deal_up_stream_user_logic, failed.");
         }
 
 #ifdef EVENT_POST_ENABLED
@@ -934,6 +990,9 @@ int light_data_template_demo(void)
     }
 
 exit:
+
+    Log_e("exit while loop\r\n");
+    SEGGER_SYSVIEW_WarnfHost("exit while loop");
 
 #ifdef MULTITHREAD_ENABLED
     IOT_Template_Stop_Yield_Thread(client);

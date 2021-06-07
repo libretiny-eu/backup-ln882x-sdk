@@ -161,7 +161,7 @@ static void ping_recv(int s)
 }
 
 static OS_Thread_t g_ping_thread;
-#define USR_PING_TASK_STACK_SIZE  4*256 //Byte
+#define USR_PING_TASK_STACK_SIZE  6*256 //Byte
 uint8_t ping_status = 0;
 
 void

@@ -14,6 +14,7 @@ set(PRO_SRC
     ${PRO_DIR}/startup/startup_ln882x_gcc.c
     ${CMAKE_SOURCE_DIR}/components/libc/newlib_stub.c
     ${QCLOUD_IOT_SAMPLES_SRC}
+    ${PRO_DIR}/qcloud_port/airkiss_port_qcloud.c
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/lib/gcclib)
@@ -22,19 +23,50 @@ set(pro_executable_target  ${TARGET_ELF_NAME})
 
 add_executable(${pro_executable_target}  ${PRO_SRC})
 
-set(COMP_ATCMD_SUPPORT    ON  PARENT_SCOPE)
-set(COMP_FOTA_SUPPORT     ON  PARENT_SCOPE)
-set(COMP_AIRKISS_SUPPORT  ON  PARENT_SCOPE)
-set(COMP_PARTMGR_SUPPORT  ON  PARENT_SCOPE)
-set(COMP_SMARTCFG_SUPPORT  ON  PARENT_SCOPE)
-set(COMP_SOFTAPCFG_SUPPORT  ON  PARENT_SCOPE)
-set(COMP_QCLOUD_SDK_SUPPORT  ON  PARENT_SCOPE)
+set(COMP_ATCMD_SUPPORT          ON  PARENT_SCOPE)
+set(COMP_FOTA_SUPPORT           ON  PARENT_SCOPE)
+
+set(COMP_PARTMGR_SUPPORT        ON  PARENT_SCOPE)
+set(COMP_SMARTCFG_SUPPORT       ON  PARENT_SCOPE)
+set(COMP_SOFTAPCFG_SUPPORT      ON  PARENT_SCOPE)
+set(COMP_QCLOUD_SDK_SUPPORT     ON  PARENT_SCOPE)
+
+#---------------------------  airkiss  settings  -------------------------------
+set(USER_AIRKISS_SUPPORT            ON)
+if(USER_AIRKISS_SUPPORT)
+    set(COMP_AIRKISS_SUPPORT        ON  PARENT_SCOPE)
+    set(EXTRA_LIB   ${EXTRA_LIB}  components::smartlink::airkiss)
+endif(USER_AIRKISS_SUPPORT)
+
+
+#--------------------------  systemview  settings  -----------------------------
+set(USER_SYSTEMVIEW_SUPPORT         ON)
+if(USER_SYSTEMVIEW_SUPPORT)
+    set(COMP_SYSTEMVIEW_SUPPORT     ON  PARENT_SCOPE) # global variable -- ON
+    add_definitions(-DSYSTEMVIEW_ENABLED)
+    set(EXTRA_LIB   ${EXTRA_LIB}  components::systemview)
+endif(USER_SYSTEMVIEW_SUPPORT)
+
+
+target_include_directories(${pro_executable_target}
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/app
+    ${CMAKE_CURRENT_SOURCE_DIR}/bsp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cfg
+    ${CMAKE_CURRENT_SOURCE_DIR}/qcloud_port
+    ${COMP_FOTA_DIR}/ota_agent
+    ${COMP_AIRKISS_DIR}
+    ${COMP_SMARTCFG_DIR}
+    ${COMP_SOFTAPCFG_DIR}
+    ${COMP_QCLOUD_SDK_DIR}/include
+    ${COMP_QCLOUD_SDK_DIR}/include/exports
+    ${MCU_LN882X_DIR}/driver_ln882x/inc/reg
+)
 
 target_link_libraries(${pro_executable_target}
     PUBLIC
     components::qcloud
     components::net::mbedtls
-    components::smartlink::airkiss
     components::smartlink::softapcfg
     components::smartlink::smartcfg
     wifi
@@ -45,26 +77,13 @@ target_link_libraries(${pro_executable_target}
     components::atcmd
     components::serial
     components::phony
+    ${EXTRA_LIB}
     driver_ln882x
     -lc -lm -lnosys
 
     PRIVATE
     -T${LINKER_SCRIPT}
     ${EXTRA_LINK_FLAGS}
-)
-
-target_include_directories(${pro_executable_target}
-    PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/app
-    ${CMAKE_CURRENT_SOURCE_DIR}/bsp
-    ${CMAKE_CURRENT_SOURCE_DIR}/cfg
-    ${COMP_FOTA_DIR}/ota_agent
-    ${COMP_AIRKISS_DIR}
-    ${COMP_SMARTCFG_DIR}
-    ${COMP_SOFTAPCFG_DIR}
-    ${COMP_QCLOUD_SDK_DIR}/include
-    ${COMP_QCLOUD_SDK_DIR}/include/exports
-    ${MCU_LN882X_DIR}/driver_ln882x/inc/reg
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/gcc/gcc-postbuild.cmake)

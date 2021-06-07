@@ -17,19 +17,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>   
+#include <string.h>
 
 #include "FreeRTOS.h"
 #include "qcloud_iot_import.h"
 
+#include "SEGGER_SYSVIEW.h"
 
 uint32_t HAL_GetTimeMs(void)
 {
-	return xTaskGetTickCount()*1000/configTICK_RATE_HZ;
+	return xTaskGetTickCount() * (1000/configTICK_RATE_HZ);
 }
 
 /*Get timestamp*/
-long HAL_Timer_current_sec(void) 
+long HAL_Timer_current_sec(void)
 {
 	return HAL_GetTimeMs()/1000;
 }
@@ -43,34 +44,36 @@ char *HAL_Timer_current(char *time_str)
 
 }
 
-bool HAL_Timer_expired(Timer *timer) 
+bool HAL_Timer_expired(Timer *timer)
 {
     uint32_t now_ts;
-	
+
 	now_ts	= HAL_GetTimeMs();
 
+	SEGGER_SYSVIEW_PrintfHost("now ms: %u, end ms: %u, expired: %d",
+		now_ts, timer->end_time, (now_ts > timer->end_time) ? 1 : 0);
 
     return (now_ts > timer->end_time)?true:false;
 }
 
-void HAL_Timer_countdown_ms(Timer *timer, unsigned int timeout_ms) 
+void HAL_Timer_countdown_ms(Timer *timer, unsigned int timeout_ms)
 {
 	timer->end_time = HAL_GetTimeMs();
-    timer->end_time += timeout_ms;	
+    timer->end_time += timeout_ms;
 }
 
-void HAL_Timer_countdown(Timer *timer, unsigned int timeout) 
+void HAL_Timer_countdown(Timer *timer, unsigned int timeout)
 {
     timer->end_time = HAL_GetTimeMs();
 	timer->end_time += timeout*1000;
 }
 
-int HAL_Timer_remain(Timer *timer) 
+int HAL_Timer_remain(Timer *timer)
 {
-	 return (int)(timer->end_time - HAL_GetTimeMs()); 	
+	 return (int)(timer->end_time - HAL_GetTimeMs());
 }
 
-void HAL_Timer_init(Timer *timer) 
+void HAL_Timer_init(Timer *timer)
 {
       timer->end_time = 0;
 }

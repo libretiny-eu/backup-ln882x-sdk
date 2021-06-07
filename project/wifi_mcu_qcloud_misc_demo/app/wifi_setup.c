@@ -124,9 +124,9 @@ void setup_wifi_via_softap(void)
 
     hal_sleep_set_mode(ACTIVE);
 
-    ln_softapcfg_set_product_param("id_xxx", "name_xxx", "ver_xxx");
+    ln_softapcfg_set_product_param("DFK2GJBO5I", "light003", "2.0");
 
-    if (LN_TRUE != ln_softapcfg_start("softap_cfg_wifi", "12345678", "192.168.4.1")) {
+    if (LN_TRUE != ln_softapcfg_start("softap_cfg", "12345678", "192.168.4.1")) {
         LOG(LOG_LVL_ERROR, "start softapcfg failed!!!\r\n");
     }
 

@@ -75,6 +75,7 @@ static void wifi_manager_task_entry(void *params)
 
                 case WIFI_MSG_ID_STA_CONNECTED:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_STA_CONNECTED\r\n", __func__, __LINE__);
+
                     //1.netif set up & link up.
                     ethernetif_set_state(STATION_IF, NETIF_UP);
                     wifi_set_dhcp_status (0);
@@ -82,6 +83,7 @@ static void wifi_manager_task_entry(void *params)
 
                 case WIFI_MSG_ID_STA_DISCONNECTED:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_STA_DISCONNECTED\r\n", __func__, __LINE__);
+
                     //1.netif link down & set down.
                     ethernetif_set_state(STATION_IF, NETIF_DOWN);
                     wifi_set_dhcp_status (0);
@@ -89,16 +91,19 @@ static void wifi_manager_task_entry(void *params)
 
                 case WIFI_MSG_ID_STA_AUTHMODE_CHANGE:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_STA_AUTHMODE_CHANGE\r\n", __func__, __LINE__);
+
                     break;
 
                 case WIFI_MSG_ID_STA_DHCP_GETING_IP:
                     //1.Log out:dhcp geting ip,update sta status.
                     //LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_STA_DHCP_GETING_IP\r\n", __func__, __LINE__);
+
                     break;
 
                 case WIFI_MSG_ID_STA_DHCP_GOT_IP:
                     //1.Log out:dhcp got ip,update sta status.
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_STA_DHCP_GOT_IP\r\n", __func__, __LINE__);
+
                     wifi_set_dhcp_status (1);
                     break;
 
@@ -109,10 +114,12 @@ static void wifi_manager_task_entry(void *params)
                 case WIFI_MSG_ID_STA_USE_STATIC_IP:
                     //1.Log out:sta use static ip,update sta status
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_STA_USE_STATIC_IP\r\n", __func__, __LINE__);
+
                     break;
 
                 case WIFI_MSG_ID_AP_READY:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_AP_READY\r\n", __func__, __LINE__);
+
                     if(wifi_msg.msg[0] == 1){
                         ethernetif_set_state(SOFT_AP_IF, NETIF_UP);
                     }
@@ -121,6 +128,7 @@ static void wifi_manager_task_entry(void *params)
 
                 case WIFI_MSG_ID_AP_STACONNECTED:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_AP_STACONNECTED\r\n", __func__, __LINE__);
+
                     //1.update sta_infor list
                     //2.flash WIFI LED
                     break;
@@ -128,6 +136,7 @@ static void wifi_manager_task_entry(void *params)
                 case WIFI_MSG_ID_AP_STADISCONNECTED:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_AP_STADISCONNECTED\r\n", __func__, __LINE__);
                     LOG(LOG_LVL_INFO, "[%s, %d]wifi_msg.msg="MACSTR"\r\n", __func__, __LINE__, MAC2STR(wifi_msg.msg));
+
                     ethernetif_remove_station((uint8_t *)wifi_msg.msg);
                     //1.update sta_infor list
                     //2.flash WIFI LED
@@ -136,6 +145,7 @@ static void wifi_manager_task_entry(void *params)
                 //$)AT]N*firmware4&@m#,N4EWIO@4
                 case WIFI_MSG_ID_AP_PROBEREQRECVED:
                     LOG(LOG_LVL_INFO, "[%s, %d]WIFI_MSG_ID_AP_PROBEREQRECVED\r\n", __func__, __LINE__);
+
                     break;
 
                 //recv beacon
@@ -153,6 +163,7 @@ static void wifi_manager_task_entry(void *params)
             if(fun_callback != NULL && (uint8_t)wifi_msg.msg_id <= WIFI_MSG_ID_MAX){
                 fun_callback(&wifi_msg);
             }
+        } else {
         }
         //OS_MsDelay(5);
     }
