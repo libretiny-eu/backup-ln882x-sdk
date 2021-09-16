@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  NVDS_SRC  ${COMP_NVDS_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${NVDS_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_NVDS_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  NVDS_SRC  ${COMP_NVDS_DIR}  "*.c")
 
 set(nvds_static_target "nvds")
 add_library(${nvds_static_target} STATIC ${NVDS_SRC})

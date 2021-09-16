@@ -7,7 +7,7 @@
 #include "ota_port.h"
 #include "ota_image.h"
 #include "ota_types.h"
-#include "ln_kv_api.h"
+#include "ln_nvds.h"
 
 #include "utils/debug/art_assert.h"
 #include "utils/debug/log.h"
@@ -230,7 +230,8 @@ static int ota_verify_download(void)
 static int update_ota_state(void)
 {
     upg_state_t state = UPG_STATE_DOWNLOAD_OK;
-    ln_kv_set(KV_OTA_UPG_STATE, (const void *)&state, sizeof(upg_state_t));
+    ln_nvds_set_ota_upg_state((uint32_t)state);
+    
     return LN_TRUE;
 }
 

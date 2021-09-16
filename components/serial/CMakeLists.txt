@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  SERIAL_SRC  ${COMP_SERIAL_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${SERIAL_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_SERIAL_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  SERIAL_SRC  ${COMP_SERIAL_DIR}  "*.c")
 
 set(serial_static_target "serial")
 add_library(${serial_static_target} STATIC ${SERIAL_SRC})

@@ -109,7 +109,7 @@ void ethernetif_low_level_input(wifi_interface_enum_t nif_idx, uint8_t *data, ui
 		memcpy(q->payload, data, q->len);
 		data += q->len;
     }
-    
+
     struct netif *nif = ethernetif_get_netif(nif_idx);
     if(nif->input(pkt, nif) != ERR_OK)
     {
@@ -448,12 +448,12 @@ int ethernetif_set_state(wifi_interface_enum_t nif_idx, netif_state_enum_t up)
 		        notify_wifi_manager_task(&wifi_msg);
             }
         }else{
+            netif_set_down(nif);
+            netif_set_link_down(nif);
+            netif_set_status_callback(nif, NULL);
             dhcp_release(nif);
             dhcp_stop(nif);
             dhcp_cleanup(nif);
-            netif_set_status_callback(nif, NULL);
-            netif_set_link_down(nif);
-            netif_set_down(nif);
 			ndev->link = LINK_DOWN;
         }
     }else if(nif_idx == SOFT_AP_IF){//for AP

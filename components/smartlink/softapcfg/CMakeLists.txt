@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  SOFTAPCFG_SRC  ${COMP_SOFTAPCFG_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${SOFTAPCFG_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_SOFTAPCFG_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  SOFTAPCFG_SRC  ${COMP_SOFTAPCFG_DIR}  "*.c")
 
 set(softapcfg_static_target   "softapcfg")
 add_library(${softapcfg_static_target}  STATIC  ${SOFTAPCFG_SRC})

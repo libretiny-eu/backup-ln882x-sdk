@@ -12,6 +12,7 @@
 #include "hal/hal_adc.h"
 #include "ln_softapcfg_api.h"
 #include "ln_kv_api.h"
+#include "ln_nvds.h"
 
 
 static OS_Thread_t g_usr_app_thread;
@@ -35,7 +36,7 @@ void wifi_init_sta(void)
         .dhcp_mode   = WLAN_DHCP_CLIENT,
         .scanned_ap_list_size = SCANNED_AP_LIST_SIZE,
     };
-    
+
     memset(&wifi_config, 0, sizeof(wifi_config_t));
 
     //Check mac address
@@ -49,10 +50,10 @@ void wifi_init_sta(void)
         ln_generate_random_mac(macaddr);
         wifi_set_macaddr(STATION_IF, macaddr);
     }
-    
+
     wifi_set_mode(init_param.wifi_mode);
     wifi_set_config(STATION_IF, &wifi_config);
-    if(!wifi_start(&init_param, true)){
+    if(0 != wifi_start(&init_param, true)){
         LOG(LOG_LVL_ERROR, "[%s, %d]wifi_start() fail.\r\n", __func__, __LINE__);
     }
 }
@@ -60,12 +61,12 @@ void wifi_init_sta(void)
 void connect_to_ap(uint8_t * ssid, uint8_t * pwd)
 {
     wifi_config_t wifi_config = {0,};
-    
+
     memset(&wifi_config, 0, sizeof(wifi_config_t));
     memcpy(wifi_config.sta.ssid,ssid, strlen((const char *)ssid));
     memcpy(wifi_config.sta.password,pwd, strlen((const char *)pwd));
 
-    wifi_station_connect((wifi_sta_config_t *)&wifi_config);
+    wifi_station_connect(&wifi_config);
 }
 
 void usr_app_task_entry(void *params)
@@ -76,7 +77,7 @@ void usr_app_task_entry(void *params)
     hal_sleep_set_mode(LIGHT_SLEEP);//ACTIVE
 
     ln_softapcfg_set_product_param("id_xxx", "name_xxx", "ver_xxx");
-    
+
     if (LN_TRUE != ln_softapcfg_start("softap_cfg_wifi", "12345678", "192.168.4.1")) {
         LOG(LOG_LVL_INFO, "start softapcfg failed!\r\n");
     }
@@ -84,12 +85,12 @@ void usr_app_task_entry(void *params)
     while (LN_TRUE != ln_softapcfg_is_complete()) {
         OS_MsDelay(300);
     }
-    
+
     ln_softapcfg_stop();
-    
+
     ssid = ln_softapcfg_get_ssid();
     pwd  = ln_softapcfg_get_pwd();
-    
+
     wifi_init_sta();
     connect_to_ap(ssid, pwd);
 
@@ -97,9 +98,9 @@ void usr_app_task_entry(void *params)
     while(LINK_UP != ethernetif_get_link_state()){
         OS_MsDelay(300);
     }
-    
+
     //....
-    
+
     while(1)
     {
         OS_MsDelay(200);
@@ -109,11 +110,13 @@ void usr_app_task_entry(void *params)
 void temp_cal_app_task_entry(void *params)
 {
     int8_t cap_comp = 0;
-    uint32_t v_len = 0;
 
-    if (LN_TRUE == ln_kv_has_key(KV_XTAL_COMP_VAL)) {
-        ln_kv_get(KV_XTAL_COMP_VAL, &cap_comp, sizeof(int8_t), &v_len);
+    if (NVDS_ERR_OK == ln_nvds_get_xtal_comp_val((uint8_t *)&cap_comp)) {
+        if ((uint8_t)cap_comp == 0xFF) {
+            cap_comp = 0;
+        }
     }
+
     drv_adc_init();
     OS_MsDelay(1);
     wifi_temp_cal_init(drv_adc_read(INTL_ADC_CHAN_0), cap_comp);

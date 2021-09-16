@@ -3,6 +3,7 @@
 #include "ln_kv_api.h"
 #include "itypes.h"
 #include "osal/osal.h"
+#include "ln_nvds.h"
 #include "ln_compiler.h"
 
 /* hardware for MAC Interrupt */
@@ -67,6 +68,11 @@ void wlib_xtal40m_cap_set(uint8_t cap)
     HAL_SYSCON_Xtal40MCap_Set(cap);
 }
 
+void wlib_xtal40m_vol_set(uint8_t vol)
+{
+    HAL_SYSCON_XtalVol_Set(vol);
+}
+
 /* misc */
 #include "utils/art_string.h"
 uint8_t wlib_char2hex(char c)
@@ -123,11 +129,17 @@ int wlib_kv_has_psk_info_list(void)
 /* tx power external compensation */
 int wlib_get_tx_power_ext_comp_val(int8_t *val)
 {
-    size_t len;
-    *val = 0;
-    if (LN_TRUE == ln_kv_has_key(KV_TX_POWER_COMP_VAL)) {
-        ln_kv_get(KV_TX_POWER_COMP_VAL, val, sizeof(int8_t), &len);
+    uint8_t rd_val = 0;
+    
+    if (NVDS_ERR_OK != ln_nvds_get_tx_power_comp(&rd_val)) {
+        return BTRUE;
     }
+    
+    if (rd_val == 0xFF) {
+        return BTRUE;
+    }
+    
+    *val = (int8_t)rd_val;
     return BTRUE;
 }
 
@@ -188,6 +200,66 @@ void wlib_assert(int expr, const char *fun, int line)
         while(1);
     }
 }
+
+/* sniffer pool buf */
+#include "utils/ln_mem_pool.h"
+#define SNIFFER_MEM_POOL_USE_DYNAMIC_MEM   (1)
+#define SNIFFER_MEM_POOL_CHUNK_CNT         (200)
+#define SNIFFER_MEM_POOL_CHUNK_BUF_SIZE    (30)
+#define SNIFFER_MEM_POOL_CHUNK_SIZE        (MEM_POOL_CHUNK_INFO_SIZE + SNIFFER_MEM_POOL_CHUNK_BUF_SIZE)
+static ln_mem_pool_t sniffer_mem_pool = {0};
+
+int wlib_sniffer_mem_pool_init(void)
+{
+#if (defined(SNIFFER_MEM_POOL_USE_DYNAMIC_MEM) && SNIFFER_MEM_POOL_USE_SYNC_MEM)
+    sniffer_mem_pool.mem_base       = (uint8_t  *)OS_Malloc(SNIFFER_MEM_POOL_CHUNK_CNT * SNIFFER_MEM_POOL_CHUNK_SIZE);
+    sniffer_mem_pool.free_chunk_ptr = (uint8_t **)OS_Malloc(SNIFFER_MEM_POOL_CHUNK_CNT * sizeof(void *));
+    if (!sniffer_mem_pool.mem_base || !sniffer_mem_pool.free_chunk_ptr) {
+        WLIB_LOG(WLIB_LOG_E, "sniffer mem pool use dynamic mem(OS_Malloc) failed.\r\n");
+        return LN_FALSE;
+    }
+#else
+    static uint8_t  g_sniffer_mem_block[SNIFFER_MEM_POOL_CHUNK_CNT * SNIFFER_MEM_POOL_CHUNK_SIZE] = {0};
+    static uint8_t *sniffer_mem_pool_chunk_ptr[SNIFFER_MEM_POOL_CHUNK_CNT] = {0};
+    sniffer_mem_pool.mem_base         = g_sniffer_mem_block;
+    sniffer_mem_pool.free_chunk_ptr   = (uint8_t **)sniffer_mem_pool_chunk_ptr;    
+#endif
+
+    sniffer_mem_pool.total_chunk_cnt  = SNIFFER_MEM_POOL_CHUNK_CNT;
+    sniffer_mem_pool.chunk_size       = SNIFFER_MEM_POOL_CHUNK_SIZE;
+    ln_mem_pool_init(&sniffer_mem_pool);
+
+    return LN_TRUE;
+}
+
+void wlib_sniffer_mem_pool_deinit(void)
+{
+#if (defined(SNIFFER_MEM_POOL_USE_DYNAMIC_MEM) && SNIFFER_MEM_POOL_USE_SYNC_MEM)
+    OS_Free(sniffer_mem_pool.mem_base);
+    OS_Free(sniffer_mem_pool.free_chunk_ptr);
+#endif
+}
+
+void *wlib_sniffer_mem_pool_alloc(void)
+{
+    return ln_mem_pool_alloc(&sniffer_mem_pool);
+}
+
+int wlib_sniffer_mem_pool_free(void *addr)
+{
+    return ln_mem_pool_free(&sniffer_mem_pool, addr);
+}
+
+uint16_t wlib_sniffer_mem_chunk_count_get(void)
+{
+    return SNIFFER_MEM_POOL_CHUNK_CNT;
+}
+
+uint16_t wlib_sniffer_mem_chunk_buf_size_get(void)
+{
+    return SNIFFER_MEM_POOL_CHUNK_BUF_SIZE;
+}
+
 
 /* cpu sleep voter register */
 #include "hal/hal_sleep.h"

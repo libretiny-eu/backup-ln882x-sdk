@@ -17,17 +17,6 @@ set(FreeRTOS_SRC
     ${COMP_KERNEL_DIR}/FreeRTOS_Adapter/freertos_timer.c
 )
 
-set(PRO_SOURCE ${PRO_SOURCE} ${FreeRTOS_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE
-    ${PRO_INCLUDE}
-    ${COMP_KERNEL_DIR}
-    ${COMP_KERNEL_DIR}/osal
-    ${COMP_KERNEL_DIR}/FreeRTOS_Adapter
-    ${COMP_KERNEL_DIR}/FreeRTOS/Source/include
-    ${COMP_KERNEL_DIR}/FreeRTOS/Source/portable/GCC/ARM_CM4F
-    PARENT_SCOPE
-)
-
 set(kernel_static_target "kernel")
 add_library(${kernel_static_target} STATIC ${FreeRTOS_SRC})
 add_library(components::kernel ALIAS ${kernel_static_target})

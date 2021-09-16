@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  AIRKISS_SRC  ${COMP_AIRKISS_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${AIRKISS_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_AIRKISS_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  AIRKISS_SRC  ${COMP_AIRKISS_DIR}  "*.c")
 
 set(airkiss_static_target   "airkiss")
 add_library(${airkiss_static_target}  STATIC  ${AIRKISS_SRC})

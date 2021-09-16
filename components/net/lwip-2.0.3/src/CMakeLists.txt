@@ -193,13 +193,6 @@ set(LWIP_SRC_C
     ${COMP_LWIP_DIR}/port/arch/sys_arch.c
 )
 
-set(PRO_SOURCE   ${PRO_SOURCE}   ${LWIP_SRC_C}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}
-    ${COMP_LWIP_DIR}/include
-    ${COMP_LWIP_DIR}/port
-    PARENT_SCOPE
-)
-
 set(lwip_static_target "lwip")
 add_library(${lwip_static_target} STATIC ${LWIP_SRC_C})
 add_library(components::net::lwip ALIAS ${lwip_static_target})

@@ -1,12 +1,4 @@
-file(GLOB_RECURSE  KV_SRC  ${COMP_KV_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE  ${PRO_SOURCE}  ${KV_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE
-    ${PRO_INCLUDE}
-    ${COMP_KV_DIR}/kv
-    ${COMP_KV_DIR}/kv_port
-    PARENT_SCOPE
-)
+file(GLOB_RECURSE  KV_SRC  ${COMP_KV_DIR}  "*.c")
 
 set(kv_static_target "kv")
 add_library(${kv_static_target} STATIC ${KV_SRC})

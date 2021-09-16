@@ -3,9 +3,9 @@
 
 #include "ln_types.h"
 
-typedef int (*kv_flash_write_t)(uint32_t addr, const void *buf, size_t len);
-typedef int (*kv_flash_read_t)(uint32_t addr, void *buf, size_t len);
-typedef int (*kv_flash_erase_t)(uint32_t addr, size_t len);
+typedef int (*kv_flash_write_t)(uint32_t addr, const void *buf, uint32_t len);
+typedef int (*kv_flash_read_t)(uint32_t addr, void *buf, uint32_t len);
+typedef int (*kv_flash_erase_t)(uint32_t addr, uint32_t len);
 
 typedef struct kv_flash_drv_st {
     kv_flash_write_t    write;

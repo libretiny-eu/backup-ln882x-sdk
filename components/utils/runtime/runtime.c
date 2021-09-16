@@ -67,7 +67,7 @@ void ln_block_delayms(uint32_t ms)
     if ( ms < ((0xFFFFFFFFUL/SYSTEM_CLOCK) * 1000UL)) {
         ln_block_delayus( 1000UL * ms);
     } else {
-        for (t = 0; t < ms; ms++) {
+        for (t = 0; t < ms; t++) {
             ln_block_delayus(1000UL);        
         }
     }

@@ -75,6 +75,20 @@
 #endif /* KV_CONFIG_OS_NONE */
 
 
-
+#if (0)
+    #include "utils/debug/log.h"
+    #define log_a(...)  LOG(LOG_LVL_ERROR, __VA_ARGS__)
+    #define log_e(...)  LOG(LOG_LVL_ERROR, __VA_ARGS__)
+    #define log_w(...)  LOG(LOG_LVL_WARN, __VA_ARGS__)
+    #define log_i(...)  LOG(LOG_LVL_INFO, __VA_ARGS__)
+    #define log_d(...)  LOG(LOG_LVL_DEBUG, __VA_ARGS__)
+#else
+    #define log_a(...)
+    #define log_e(...)
+    #define log_w(...)
+    #define log_i(...)
+    #define log_d(...)
+#endif
+  
 #endif /* __LN_KV_PORT_H__ */
 

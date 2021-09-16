@@ -5,7 +5,7 @@ typedef enum {
     OTA_ERR_NONE = 0u,
     OTA_ERR_INVALID_PARAM,
     
-    OTA_ERR_KV_RW = 10u,
+    OTA_ERR_NVDS_RW = 10u,
     OTA_ERR_UPG_STATE,
     OTA_ERR_PARTITION_TAB,
     OTA_ERR_DECOMPRESS,

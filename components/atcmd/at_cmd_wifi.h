@@ -96,17 +96,6 @@ char at_get_cpu_usage(char * str);
 char at_get_chip_sn(char * str);
 char at_set_chip_sn(char * str);
 
-//bt id
-char at_get_bt_id(char * str);
-char at_set_bt_id(char * str);
-
-//bt mac
-char at_get_bt_mac(char * str);
-char at_set_bt_mac(char * str);
-
-//CNVDS
-char at_nvds(char * str);
-
 //CEFUSE
 char at_get_efuse(char * str);
 char at_set_efuse(char * str);

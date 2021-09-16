@@ -15,7 +15,7 @@
         <TargetCommonOption>
           <Device>ARMCM4_FP</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.4.5.0</PackID>
+          <PackID>ARM.CMSIS.5.4.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IROM(0x00000000,0x00040000) IRAM(0x20000000,0x00020000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -1123,9 +1123,9 @@
               <FilePath>..\..\..\components\fs\partition_mgr\flash_partition_mgr.c</FilePath>
             </File>
             <File>
-              <FileName>nvds.c</FileName>
+              <FileName>ln_nvds.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\components\fs\nvds\nvds.c</FilePath>
+              <FilePath>..\..\..\components\fs\nvds\ln_nvds.c</FilePath>
             </File>
             <File>
               <FileName>ln_kv.c</FileName>

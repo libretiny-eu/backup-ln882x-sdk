@@ -1,10 +1,6 @@
-file(GLOB_RECURSE  PING_SRC  ${COMP_PING_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${PING_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_PING_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  PING_SRC  ${COMP_PING_DIR}  "*.c")
 
 set(ping_static_target "ping")
-
 add_library(${ping_static_target} STATIC ${PING_SRC})
 add_library(components::net::ping ALIAS ${ping_static_target})
 

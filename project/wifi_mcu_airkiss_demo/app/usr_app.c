@@ -14,7 +14,7 @@
 #include "utils/system_parameter.h"
 #include "hal/hal_adc.h"
 #include "ln_kv_api.h"
-
+#include "ln_nvds.h"
 #include "airkiss_entry.h"
 
 
@@ -35,7 +35,7 @@ void wifi_init_sta(void)
 
     wifi_init_type_t init_param = {
         .wifi_mode = WIFI_MODE_STATION,
-        .sta_ps_mode = WIFI_MIN_POWERSAVE,//WIFI_NO_POWERSAVE,
+        .sta_ps_mode = WIFI_NO_POWERSAVE,//WIFI_MIN_POWERSAVE,
         .dhcp_mode = WLAN_DHCP_CLIENT,
         .scanned_ap_list_size = SCANNED_AP_LIST_SIZE,
     };
@@ -60,7 +60,7 @@ void wifi_init_sta(void)
     wifi_set_config(STATION_IF, &wifi_config);
 
     //Startup WiFi.
-    if(!wifi_start(&init_param, true)){//WIFI_MAX_POWERSAVE
+    if(0 != wifi_start(&init_param, true)){
         LOG(LOG_LVL_ERROR, "[%s, %d]wifi_start() fail.\r\n", __func__, __LINE__);
     }
 }
@@ -68,12 +68,12 @@ void wifi_init_sta(void)
 void connect_to_ap(uint8_t * ssid, uint8_t * pwd)
 {
     wifi_config_t wifi_config = {0,};
-    
+
     memset(&wifi_config, 0, sizeof(wifi_config_t));
     memcpy(wifi_config.sta.ssid,ssid, strlen((const char *)ssid));
     memcpy(wifi_config.sta.password,pwd, strlen((const char *)pwd));
 
-    wifi_station_connect((wifi_sta_config_t *)&wifi_config);
+    wifi_station_connect(&wifi_config);
 }
 
 
@@ -82,15 +82,15 @@ void usr_app_task_entry(void *params)
     uint16_t channel_mask = 0;
     uint8_t * ssid = NULL;
     uint8_t * pwd = NULL;
-    
+
     //Set sleep mode
     hal_sleep_set_mode(LIGHT_SLEEP);//ACTIVE
 
     wifi_init_sta();
-    
+
     channel_mask = CH1_MASK | CH2_MASK | CH3_MASK | CH4_MASK | CH5_MASK | CH6_MASK | \
                    CH7_MASK | CH8_MASK | CH9_MASK | CH10_MASK | CH11_MASK | CH12_MASK | CH13_MASK;
-    
+
     if (!airkiss_start(channel_mask)) {
         LOG(LOG_LVL_INFO, "failed to start airkiss...\r\n");
     }
@@ -98,9 +98,9 @@ void usr_app_task_entry(void *params)
     while (!airkiss_is_complete()) {
         OS_MsDelay(300);
     }
-    
+
     airkiss_stop();
-    
+
     ssid = airkiss_get_ssid();
     pwd  = airkiss_get_pwd();
     connect_to_ap(ssid, pwd);
@@ -109,9 +109,9 @@ void usr_app_task_entry(void *params)
     while(LINK_UP != ethernetif_get_link_state()){
         OS_MsDelay(300);
     }
-    
+
     airkiss_send_ack();
-    
+
     while(1)
     {
         OS_MsDelay(200);
@@ -121,11 +121,13 @@ void usr_app_task_entry(void *params)
 void temp_cal_app_task_entry(void *params)
 {
     int8_t cap_comp = 0;
-    uint32_t v_len = 0;
 
-    if (LN_TRUE == ln_kv_has_key(KV_XTAL_COMP_VAL)) {
-        ln_kv_get(KV_XTAL_COMP_VAL, &cap_comp, sizeof(int8_t), &v_len);
+    if (NVDS_ERR_OK == ln_nvds_get_xtal_comp_val((uint8_t *)&cap_comp)) {
+        if ((uint8_t)cap_comp == 0xFF) {
+            cap_comp = 0;
+        }
     }
+
     drv_adc_init();
     OS_MsDelay(1);
     wifi_temp_cal_init(drv_adc_read(INTL_ADC_CHAN_0), cap_comp);

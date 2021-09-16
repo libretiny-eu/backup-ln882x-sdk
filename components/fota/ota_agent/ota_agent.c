@@ -3,7 +3,6 @@
 #include "ota_port.h"
 #include "xz_decompress.h"
 #include "flash_partition_mgr.h"
-#include "ln_kv_key_def.h"
 #include <string.h>
 
 static uint8_t temp_buf[LEN_4KB];
@@ -152,9 +151,9 @@ static int restore_image(jump_to_app_t jump_to_app)
             // update OTA upg state
             upgrade_state = UPG_STATE_RESTORE_OK;
 
-            if (LN_TRUE != port->kv_ops.kv_set(KV_OTA_UPG_STATE, &upgrade_state, sizeof(upg_state_t))) {
+            if (LN_TRUE != port->upg_state_set(upgrade_state)) {
                 //TODO:HOOK
-                return OTA_ERR_KV_RW;
+                return OTA_ERR_NVDS_RW;
             }
 
             jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
@@ -188,9 +187,9 @@ static int restore_image(jump_to_app_t jump_to_app)
             // update OTA upg state
             upgrade_state = UPG_STATE_RESTORE_OK;
 
-            if (LN_TRUE != port->kv_ops.kv_set(KV_OTA_UPG_STATE, &upgrade_state, sizeof(upg_state_t))) {
+            if (LN_TRUE != port->upg_state_set(upgrade_state)) {
                 //TODO:HOOK
-                return OTA_ERR_KV_RW;
+                return OTA_ERR_NVDS_RW;
             }
 
             jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));
@@ -219,13 +218,17 @@ static int restore_image(jump_to_app_t jump_to_app)
 int ota_boot_upgrade_agent(jump_to_app_t jump_to_app)
 {
     ota_port_ctx_t * port = ota_get_port_ctx();
-    upg_state_t  upgrade_state;
-    uint32_t v_len = 0;
+    upg_state_t  upgrade_state = (upg_state_t)((uint32_t)-1);
     int err = OTA_ERR_NONE;
 
-    if (LN_TRUE != port->kv_ops.kv_get(KV_OTA_UPG_STATE, &upgrade_state, sizeof(upg_state_t), &v_len))
+    int ret = port->upg_state_get(&upgrade_state);
+    if ((ret != LN_TRUE) || (upgrade_state == (upg_state_t)((uint32_t)-1)))
     {
-        /* upg state param error,may be first startup or KV damaged */
+        /* upg state parameter stored in the NVDS, if we have never set upgrade_state, 
+           its original value is 0xFFFFFFFF((uint32_t)-1).  
+           if reach here, may be first startup or NVDS damaged */
+
+        //LOG("upgrade_state = 0x%x", upgrade_state);
         if (OTA_ERR_NONE != (err = verify_total_img_partition(PARTITION_TYPE_APP, \
                                                       &partition_info_app, &app_header))) {
             //TODO:HOOK
@@ -292,9 +295,9 @@ int ota_boot_upgrade_agent(jump_to_app_t jump_to_app)
                     //update OTA param
                     upgrade_state = UPG_STATE_RESTORE_OK;
 
-                    if (LN_TRUE != port->kv_ops.kv_set(KV_OTA_UPG_STATE, &upgrade_state, sizeof(upg_state_t))) {
+                    if (LN_TRUE != port->upg_state_set(upgrade_state)) {
                         //TODO:HOOK
-                        return OTA_ERR_KV_RW;
+                        return OTA_ERR_NVDS_RW;
                     }
 
                     jump_to_app(partition_info_app.start_addr + sizeof(image_hdr_t));

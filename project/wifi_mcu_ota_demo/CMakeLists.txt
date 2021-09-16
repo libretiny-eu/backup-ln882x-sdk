@@ -55,5 +55,5 @@ target_include_directories(${pro_executable_target}
     ${COMP_KV_DIR}/kv
 )
 
-include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-postbuild.cmake)
+include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-custom-build-stage.cmake)
 

@@ -151,7 +151,7 @@ int HAL_Awss_Connect_Ap(
     memcpy(&target_config.sta.ssid, ssid, strlen(ssid));
     memcpy(&target_config.sta.password, passwd, strlen(passwd));
 
-    wifi_station_connect((wifi_sta_config_t *)&target_config);
+    wifi_station_connect(&target_config);
     sg_wifi_mgnt.started = 1;
 
     return SUCCESS_RETURN;

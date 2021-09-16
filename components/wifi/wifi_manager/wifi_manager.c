@@ -8,8 +8,8 @@
 #include "ln_types.h"
 #include "ln_utils.h"
 
-#define WIFI_MANAGER_TASK_STACK_SIZE     5*256 //Byte
-#define WIFI_MSG_QUEUE_DEPTH        5
+#define WIFI_MANAGER_TASK_STACK_SIZE        (5*256) //Byte
+#define WIFI_MSG_QUEUE_DEPTH                (5)
 
 
 struct wifi_manager_ctrl{

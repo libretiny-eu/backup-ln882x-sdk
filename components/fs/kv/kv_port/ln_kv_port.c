@@ -9,7 +9,11 @@ static kv_flash_prop_t  flash_prop;
 
 static int flash_read(uint32_t offset, void *buf, uint32_t len)
 {
+#if (defined(FLASH_XIP) && (FLASH_XIP == 1))
+    return FLASH_ReadByCache(offset, len, buf);
+#else
     return FLASH_Read(offset, len, buf);
+#endif
 }
 
 static int flash_write(uint32_t offset, const void *buf, uint32_t len)

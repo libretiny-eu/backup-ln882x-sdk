@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  ATCMD_SRC  ${COMP_ATCMD_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${ATCMD_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_ATCMD_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  ATCMD_SRC  ${COMP_ATCMD_DIR}  "*.c")
 
 set(atcmd_static_target "atcmd")
 

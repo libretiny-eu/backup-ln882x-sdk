@@ -1,10 +1,6 @@
-file(GLOB_RECURSE  HTTPSCLIENT_SRC  ${COMP_HTTPSCLIENT_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${HTTPSCLIENT_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_HTTPSCLIENT_DIR}/inc  PARENT_SCOPE)
+file(GLOB_RECURSE  HTTPSCLIENT_SRC  ${COMP_HTTPSCLIENT_DIR}  "*.c")
 
 set(httpsclient_static_target  "httpsclient")
-
 add_library(${httpsclient_static_target}  STATIC  ${HTTPSCLIENT_SRC})
 add_library(components::net::httpsclient  ALIAS  ${httpsclient_static_target})
 

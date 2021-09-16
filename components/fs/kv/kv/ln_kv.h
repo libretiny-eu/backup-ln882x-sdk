@@ -7,6 +7,12 @@
 #include "ln_kv_flash.h"
 #include "ln_kv_port.h"
 
+/* the max length of write unit, DOUBLEWORD, 64-bit
+   a better way is to change kv_wunit_t according the the flash program type by precompile,
+   if to do this, should let user config the flash program type as a macro, and that is not so friendly.
+   we typedef kv_wunit_t as uint64_t, so the user can focus on the code rather than how to use kv.
+   (althrough there may cause some waste of flash space, just a little, but much more comfortable for coding)
+ */
 typedef uint64_t    kv_wunit_t;
 
 typedef uint8_t     kv_byte_t;  // byte
@@ -14,6 +20,17 @@ typedef uint16_t    kv_hword_t; // half word
 typedef uint32_t    kv_word_t;  // word
 typedef uint64_t    kv_dword_t; // double word
 
+/*
+           add          delete                  no more space
+    fresh -----> inuse --------> dirty | inuse ---------------> dirty
+
+           add          no more space
+    fresh -----> inuse ---------------> NONE
+
+    if bad, probably the flash block is broken, no more try to use.
+    if hanging, maybe another chance to rebuild index.
+    there is a situation: dirty | hanging
+*/
 #define KV_BLK_FLAG_FRESH                           0x01    /* a totally virgin block */
 #define KV_BLK_FLAG_INUSE                           0x02    /* in-use */
 #define KV_BLK_FLAG_DIRTY                           0x04    /* has discarded item inside */
@@ -52,7 +69,7 @@ typedef uint64_t    kv_dword_t; // double word
 
 #define KV_NO_WRITEABLE_BLK()                       (KV_MGR_BLK_NUM_INUSE == 0 && KV_MGR_BLK_NUM_FRESH == 0)
 
-#define KV_ITEM_HDR_MAGIC                           0xABCD1234DCBA4321
+#define KV_ITEM_HDR_MAGIC                           0x636967616D5F7469 /* "it_magic" */
 #define KV_ITEM_DISCARDED                           0x0F0F0F0F0F0F0F0F
 #define KV_ITEM_IS_DISCARDED(item_hdr)              ((item_hdr)->discarded_flag == KV_ITEM_DISCARDED)
 #define KV_ITEM_IS_LEGAL(item_hdr)                  ((item_hdr)->magic == KV_ITEM_HDR_MAGIC)
@@ -71,8 +88,22 @@ typedef uint64_t    kv_dword_t; // double word
 #define KV_ITEM_SIZE_OF_BODY(item)                  KV_ITEM_BODY_SIZE(item->hdr.k_len, item->hdr.v_len)
 #define KV_ITEM_ADDR_OF_BODY(item)                  (item->pos + KV_ITEM_HDR_SIZE)
 
-#define KV_BLK_HDR_MAGIC                            0x1234ABCD4321DCBA
-#define KV_BLK_IS_LEGAL(blk_hdr)                    ((blk_hdr)->magic == KV_BLK_HDR_MAGIC)
+#define KV_BLK_HDR_MAGIC                            0x302E31565F4B4C42 /* "BLK_V1.0" */
+#define KV_BLK_HDR_GC_SRC                           0x6372735F6B72616D /* "mark_src" */
+#define KV_BLK_HDR_GC_DST                           0x7473645F6B72616D /* "mark_dst" */
+#define KV_BLK_HDR_GC_DONE                          0x656E6F645F63676B /* "kgc_done" */
+
+#define KV_BLK_IS_LEGAL(blk_hdr)                    (((blk_hdr)->magic >> 32U) == (KV_BLK_HDR_MAGIC >> 32U))
+
+// DO NOT use gc_src == KV_BLK_HDR_GC_SRC here, in case of an incomplete write of src magic due to a power down
+#define KV_BLK_IS_GC_SRC(blk_hdr)                   ((blk_hdr)->gc_src != (kv_dword_t)-1)
+// DO NOT use gc_dst == KV_BLK_HDR_GC_DST here, in case of an incomplete write of dst magic due to a power down
+#define KV_BLK_IS_GC_DST(blk_hdr)                   ((blk_hdr)->gc_dst != (kv_dword_t)-1)
+// DO NOT use gc_done == KV_BLK_HDR_GC_DONE here, in case of an incomplete write of done magic due to a power down
+#define KV_BLK_IS_GC_DONE(blk_hdr)                  ((blk_hdr)->gc_done != (kv_dword_t)-1)
+
+#define KV_BLK_IS_GC_DST_NOT_DONE(blk_hdr)          (KV_BLK_IS_GC_DST(blk_hdr) && !KV_BLK_IS_GC_DONE(blk_hdr))
+
 #define KV_BLK_INVALID                              ((uint32_t)-1)
 #define KV_BLK_HDR_SIZE                             KV_ALIGNED_SIZE(sizeof(kv_blk_hdr_t))
 #define KV_BLK_SIZE                                 (KV_FLASH_SECTOR_SIZE)
@@ -84,7 +115,7 @@ typedef uint64_t    kv_dword_t; // double word
 #define KV_BLK_NEXT(blk_start)                      (blk_start + KV_BLK_SIZE >= KV_FLASH_END ? KV_FLASH_START : blk_start + KV_BLK_SIZE)
 
 #define KV_BLK_FOR_EACH_FROM(cur_blk, start_blk) \
-	for (cur_blk = KV_BLK_NEXT(start_blk); \
+    for (cur_blk = KV_BLK_NEXT(start_blk); \
             cur_blk != start_blk; \
             cur_blk = KV_BLK_NEXT(cur_blk))
 
@@ -112,8 +143,11 @@ typedef struct kv_blk_info_st {
     uint16_t            num_fresh;
     uint16_t            num_hanging;
     uint16_t            num_total;
-
+#if defined(KV_MGR_STATIC_MEM)
+    kv_blk_detail_t     blk_detail[(1024 * 16)/(1<<12)]; // 根据 flash_partition_cfg.json 确定数组大小
+#else
     kv_blk_detail_t    *blk_detail;
+#endif
 } kv_blk_info_t;
 
 typedef struct kv_manager_control_st {
@@ -132,6 +166,9 @@ typedef struct kv_control_st {
 
 typedef struct kv_block_header_st {
     kv_wunit_t      magic;          /*< is this block formatted? */
+    kv_wunit_t      gc_src;         /*< is this block gc-ing(as a source block)? */
+    kv_wunit_t      gc_dst;         /*< is this block gc-ing(as a destination block)? */
+    kv_wunit_t      gc_done;        /*< is this block gc done(as a destination block)? */
 } __PACKED__ kv_blk_hdr_t;
 
 typedef struct kv_item_header_st {
@@ -140,8 +177,12 @@ typedef struct kv_item_header_st {
     uint8_t         checksum;       /*< checksum for key/value buffer */
     uint8_t         k_len;          /*< key length */
     uint16_t        v_len;          /*< value length */
-    uint32_t        prev_pos;       /*< previous position of this item */
+    uint32_t        prev_pos;       /*< previous position of this item
+                                        if meet a power down while updating an item, and we have saved the new item,
+                                        but do not get a chance to delete the old one(we have two copy of the item with
+                                        the same key on flash), we should do the real delete when system is power on next time */
 } __PACKED__ kv_item_hdr_t;
+
 
 typedef struct kv_item_st {
     kv_item_hdr_t   hdr;        /*< item header */
@@ -149,7 +190,7 @@ typedef struct kv_item_st {
     uint8_t        *body;       /*< item body: key/value buffer */
 } kv_item_t;
 
-static kv_ctl_t kv_ctl;
+extern kv_ctl_t kv_ctl;
 
 __STATIC_INLINE__ void kv_blk_freesz_set(uint32_t blk_start, uint32_t free_size)
 {

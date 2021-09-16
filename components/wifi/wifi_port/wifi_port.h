@@ -15,6 +15,7 @@ void    wlib_hwtimer_stop(void);
 void    wlib_software_reset_core(void);
 void    wlib_pvtcmd_printf(const char *format, ...);
 void    wlib_xtal40m_cap_set(uint8_t cap);
+void    wlib_xtal40m_vol_set(uint8_t vol);
 
 /* misc */
 uint8_t wlib_char2hex(char c);
@@ -58,6 +59,14 @@ void   wlib_assert(int expr, const char *fun, int line);
 #define WLIB_LOG(...)             wlib_log_printf(1, __VA_ARGS__)
 #define WLIB_LOG_RAW(...)         wlib_log_printf(0, __VA_ARGS__)
 #define WLIB_ASSERT(expr)         wlib_assert((int)expr, __func__, __LINE__)
+
+/* sniffer pool buf */
+int      wlib_sniffer_mem_pool_init(void);
+void     wlib_sniffer_mem_pool_deinit(void);
+void    *wlib_sniffer_mem_pool_alloc(void);
+int      wlib_sniffer_mem_pool_free(void *addr);
+uint16_t wlib_sniffer_mem_chunk_count_get(void);
+uint16_t wlib_sniffer_mem_chunk_buf_size_get(void);
 
 /* cpu sleep voter register */
 void   wlib_cpu_sleep_voter_reg(void *vote_check, void *pre_sleep, void *post_sleep);

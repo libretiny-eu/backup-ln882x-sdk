@@ -5,7 +5,7 @@ ENTRY(Reset_Handler)
 /* Linker script to configure memory regions. */
 MEMORY
 {
-  FLASH     (rx)  : ORIGIN = 0x1000E100, LENGTH = 800K
+  FLASH     (rx)  : ORIGIN = 0x1000D100, LENGTH = 1000K
   RAM0      (rwx) : ORIGIN = 0x1FFE0000, LENGTH = 128K
   RAM1      (rwx) : ORIGIN = 0x20000000, LENGTH = 160K
   RETENTION (rwx) : ORIGIN = 0x20028000, LENGTH = 8K

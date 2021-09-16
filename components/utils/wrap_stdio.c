@@ -44,8 +44,8 @@ static char stdout_buf[WRAP_STDOUT_BUF_SIZE];
       }
   }
 #else
-  static void printf_mutex_lock(void);
-  static void printf_mutex_unlock(void);
+  static void printf_mutex_lock(void){};
+  static void printf_mutex_unlock(void){};
 #endif
 
 

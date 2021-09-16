@@ -14,6 +14,7 @@
 #include "utils/system_parameter.h"
 #include "hal/hal_adc.h"
 #include "ln_kv_api.h"
+#include "ln_nvds.h"
 #include "app_entry.h"
 
 static OS_Thread_t g_usr_app_thread;
@@ -102,7 +103,7 @@ void wifi_init_sta(void)
     wifi_config_t temp_config = {0};
     wifi_init_type_t init_param = {
         .wifi_mode = WIFI_MODE_STATION,
-        .sta_ps_mode = WIFI_MAX_POWERSAVE,
+        .sta_ps_mode = WIFI_NO_POWERSAVE,//WIFI_MAX_POWERSAVE,
         #if 1
         .dhcp_mode = WLAN_DHCP_CLIENT,
         #else
@@ -233,11 +234,13 @@ void usr_app_task_entry(void *params)
 void temp_cal_app_task_entry(void *params)
 {
     int8_t cap_comp = 0;
-    uint32_t v_len = 0;
 
-    if (LN_TRUE == ln_kv_has_key(KV_XTAL_COMP_VAL)) {
-        ln_kv_get(KV_XTAL_COMP_VAL, &cap_comp, sizeof(int8_t), &v_len);
+    if (NVDS_ERR_OK == ln_nvds_get_xtal_comp_val((uint8_t *)&cap_comp)) {
+        if ((uint8_t)cap_comp == 0xFF) {
+            cap_comp = 0;
+        }
     }
+
     drv_adc_init();
     OS_MsDelay(1);
     wifi_temp_cal_init(drv_adc_read(INTL_ADC_CHAN_0), cap_comp);

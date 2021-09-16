@@ -1,10 +1,6 @@
-file(GLOB_RECURSE  DHCPD_SRC  ${COMP_DHCPD_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${DHCPD_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_DHCPD_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  DHCPD_SRC  ${COMP_DHCPD_DIR}  "*.c")
 
 set(dhcpd_static_target "dhcpd")
-
 add_library(${dhcpd_static_target} STATIC ${DHCPD_SRC})
 add_library(components::net::dhcpd ALIAS ${dhcpd_static_target})
 

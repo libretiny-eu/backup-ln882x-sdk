@@ -94,17 +94,6 @@ set(src_tls
     ${MBEDTLS_PORTLN_DIR}/library/net_sockets.c
 )
 
-set(PRO_SOURCE   ${PRO_SOURCE}
-    ${src_crypto}
-    ${src_x509}
-    ${src_tls}
-    PARENT_SCOPE
-)
-set(PRO_INCLUDE  ${PRO_INCLUDE}
-    ${COMP_MBEDTLS_DIR}/include
-    PARENT_SCOPE
-)
-
 if(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-declarations -Wmissing-prototypes")
 endif(CMAKE_COMPILER_IS_GNUCC)

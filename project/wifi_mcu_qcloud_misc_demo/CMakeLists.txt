@@ -86,4 +86,4 @@ target_link_libraries(${pro_executable_target}
     ${EXTRA_LINK_FLAGS}
 )
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/gcc/gcc-postbuild.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/gcc/gcc-custom-build-stage.cmake)

@@ -97,10 +97,7 @@ void at_cmd_init(void)
     at_register_command("XTAL_COMP", (at_callback)at_get_xtal_cap_comp, (at_callback)at_set_xtal_cap_comp, NULL,NULL);
     at_register_command("IPERF",NULL,(at_callback)at_iperf,NULL,NULL);                                                   //iperf test
 
-    at_register_command("CBTID", (at_callback)at_get_bt_id,   (at_callback)at_set_bt_id,NULL,NULL);      //bt ID
-    at_register_command("CBTMAC", (at_callback)at_get_bt_mac, (at_callback)at_set_bt_mac,NULL,NULL);     //bt MAC
     at_register_command("CSN", (at_callback)at_get_chip_sn,   (at_callback)at_set_chip_sn,NULL,NULL);    //chip SN
-    at_register_command("CNVDS", NULL, (at_callback)at_nvds,  NULL,NULL);                                //CNVDS
     at_register_command("CEFUSE", (at_callback)at_get_efuse, (at_callback)at_set_efuse, NULL,NULL);      //CEFUSE
 
 

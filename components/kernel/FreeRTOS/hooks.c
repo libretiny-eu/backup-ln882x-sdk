@@ -8,7 +8,7 @@ extern void vApplicationMallocFailedHook(void);
 void vApplicationMallocFailedHook(void)
 {
 	/* vApplicationMallocFailedHook() will only be called if malloc failed */
-    LOG(LOG_LVL_INFO,"Malloc Failed\r\n");
+    LOG(LOG_LVL_EMERG,"Malloc Failed\r\n");
     ART_ASSERT(0);
 }
 #endif
@@ -21,7 +21,7 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
     ( void ) pxTask;
 
     /* vApplicationStackOverflowHook will only be called if stackoverflow */
-    LOG(LOG_LVL_INFO,"(%s)StackOverFlow\r\n", pcTaskName);
+    LOG(LOG_LVL_EMERG,"(%s)StackOverFlow\r\n", pcTaskName);
     ART_ASSERT(0);
 }
 #endif

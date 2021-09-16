@@ -27,6 +27,7 @@
 #include "qcloud_iot_import.h"
 
 #include "flash_partition_table.h"
+#include "ln_nvds.h"
 #include "ln_kv_api.h"
 #include "hal/flash.h"
 
@@ -35,6 +36,9 @@
 #include "ota_types.h"
 
 #define FW_RUNNING_VERSION "1.0"
+//#define FW_RUNNING_VERSION "1.1"
+//#define FW_RUNNING_VERSION "1.2"
+
 
 #define KEY_REMOTE_VERSION      "version"
 #define KEY_DOWNLOADED_SIZE     "downloaded_size"
@@ -180,6 +184,17 @@ static void _wait_for_pub_ack(OTAContextData *ota_ctx, int packet_id)
 }
 
 /**
+ * @brief 格式化固件保存区域
+ */
+static void _reformat_fw_download_area(void)
+{
+    const uint32_t fw_start_addr = OTA_SPACE_OFFSET;
+    const uint32_t fw_area_size = OTA_SPACE_SIZE;
+
+    FLASH_Erase(fw_start_addr, fw_area_size);
+}
+
+/**
  * @brief check ota image header, body.
  * @return return LN_TRUE on success, LN_FALSE on failure.
  */
@@ -213,7 +228,8 @@ static int ota_verify_download(void)
 static int update_ota_state(void)
 {
     upg_state_t state = UPG_STATE_DOWNLOAD_OK;
-    ln_kv_set(KV_OTA_UPG_STATE, (const void *)&state, sizeof(upg_state_t));
+
+    ln_nvds_set_ota_upg_state((uint32_t)state);
     return LN_TRUE;
 }
 
@@ -389,6 +405,10 @@ static int _delete_fw_info_file(char *file_name)
  */
 static int _save_fw_data_to_file(char *file_name, uint32_t offset, char *buf, int len)
 {
+    if (0 == offset) {
+        _reformat_fw_download_area();
+    }
+
     FLASH_Program(SG_OTA_FLASH_BASE_OFFSET + offset, len, (uint8_t *)buf);
 
     return 0;
@@ -511,6 +531,8 @@ bool process_ota(OTAContextData *ota_ctx)
     if (upgrade_fetch_success) {
         if ( LN_TRUE == ota_verify_download() ) {
             Log_i("OK: ota_verify_download()");
+        } else {
+            ota_verify_result = false;
         }
     } else {
         ota_verify_result = false;

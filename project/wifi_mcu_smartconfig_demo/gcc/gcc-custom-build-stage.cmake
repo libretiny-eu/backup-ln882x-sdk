@@ -1,3 +1,17 @@
+################################################################################
+#####################   update flash partition table first  ####################
+################################################################################
+set(FLASH_PYTHON_SCRIPT   ${CMAKE_SOURCE_DIR}/tools/user_cmd/before_build.py)
+set(FLASH_PART_CFG_JSON   ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/cfg/flash_partition_cfg.json)
+set(FLASH_PART_TABLE_FILE ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/cfg/flash_partition_table.h)
+
+execute_process(COMMAND python ${FLASH_PYTHON_SCRIPT} ${FLASH_PART_CFG_JSON} ${FLASH_PART_TABLE_FILE}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/cfg
+)
+
+################################################################################
+################################   make image  #################################
+################################################################################
 set(BIN_TARGET    ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.bin)
 set(HEX_TARGET    ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.hex)
 set(MAP_TARGET    ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.map)

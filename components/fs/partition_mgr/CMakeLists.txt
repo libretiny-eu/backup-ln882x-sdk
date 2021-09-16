@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  PARTITION_MGR_SRC  ${COMP_PARTMGR_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${PARTITION_MGR_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_PARTMGR_DIR}   PARENT_SCOPE)
+file(GLOB_RECURSE  PARTITION_MGR_SRC  ${COMP_PARTMGR_DIR}  "*.c")
 
 set(partition_mgr_static_target "partition_mgr")
 add_library(${partition_mgr_static_target} STATIC ${PARTITION_MGR_SRC})

@@ -1,8 +1,7 @@
 #include "ota_port.h"
 #include "ota_err.h"
 #include "hal/flash.h"
-#include "ln_kv_api.h"
-#include "ln_kv_err.h"
+#include "ln_nvds.h"
 #include "ln88xx.h" 
 
 static ota_port_ctx_t ota_port;
@@ -23,17 +22,17 @@ static int flash_erase(uint32_t offset, uint32_t len)
     return 0;
 } 
 
-static int ota_kv_set(const char *key, const void *value, size_t v_len)
+static int ota_upg_state_set(upg_state_t state)
 {
-    if (KV_ERR_NONE == ln_kv_set(key,value,v_len)) {
+    if (NVDS_ERR_OK == ln_nvds_set_ota_upg_state(state)) {
         return LN_TRUE;
     }
     return LN_FALSE;
 }
 
-static int ota_kv_get(const char *key, void *value_buf, size_t value_buf_size, size_t *v_len)
+static int ota_upg_state_get(upg_state_t *state)
 {
-    if (KV_ERR_NONE == ln_kv_get(key,value_buf,value_buf_size,v_len)) {
+    if (NVDS_ERR_OK == ln_nvds_get_ota_upg_state((uint32_t *)state)) {
         return LN_TRUE;
     }
     return LN_FALSE;
@@ -50,8 +49,8 @@ ota_err_t ota_port_init(void)
     ota_port.flash_drv.write = flash_write;
     ota_port.flash_drv.erase = flash_erase;
     
-    ota_port.kv_ops.kv_set   = ota_kv_set;
-    ota_port.kv_ops.kv_get   = ota_kv_get;
+    ota_port.upg_state_set   = ota_upg_state_set;
+    ota_port.upg_state_get   = ota_upg_state_get;
     
     ota_port.chip_reboot     = chip_reboot;
     

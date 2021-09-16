@@ -198,7 +198,7 @@ void wifi_do_temp_cal_period(uint16_t adc_ch0_val);
 int wifi_station_scan(wifi_scan_config_t *config);
 int wifi_station_get_scan_list_size(void);
 int wifi_station_get_scan_list(ln_list_t *out_list, int out_list_size, bool sort);
-int wifi_station_connect(wifi_sta_config_t *sta_config);
+int wifi_station_connect(wifi_config_t *sta_config);
 int wifi_station_disconnect(void);
 int8_t  wifi_station_get_rssi(void);
 int wifi_station_set_dtim_period(int period);

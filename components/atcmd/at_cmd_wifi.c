@@ -10,7 +10,7 @@
 #include "ping.h"
 #include "iperf.h"
 #include "dhcpd.h"
-#include "nvds.h"
+#include "ln_nvds.h"
 #include "ln_kv_api.h"
 #include "hal/hal_efuse.h"
 #include "hal/flash.h"
@@ -400,7 +400,7 @@ char at_set_wifi_mode(char *str)
         init_param.wifi_mode = WIFI_MODE_STATION;
         init_param.sta_ps_mode = WIFI_MAX_POWERSAVE;
         init_param.dhcp_mode = WLAN_DHCP_CLIENT;
-        init_param.scanned_ap_list_size = 8;
+        init_param.scanned_ap_list_size = SCANNED_AP_LIST_SIZE;
         if (0 != wifi_start(&init_param, true)) {
             goto err;
         }
@@ -470,7 +470,7 @@ char at_set_wifi_mode_current(char *str)
     init_param.wifi_mode = WIFI_MODE_STATION;
     init_param.sta_ps_mode = WIFI_MAX_POWERSAVE;
     init_param.dhcp_mode = WLAN_DHCP_CLIENT;
-    init_param.scanned_ap_list_size = 8;
+    init_param.scanned_ap_list_size = SCANNED_AP_LIST_SIZE;
     if (0 != wifi_start(&init_param, true)) {
         goto err;
     }
@@ -540,7 +540,7 @@ char at_set_wifi_mode_def(char *str)
     init_param.wifi_mode = WIFI_MODE_STATION;
     init_param.sta_ps_mode = WIFI_MAX_POWERSAVE;
     init_param.dhcp_mode = WLAN_DHCP_CLIENT;
-    init_param.scanned_ap_list_size = 8;
+    init_param.scanned_ap_list_size = SCANNED_AP_LIST_SIZE;
     if (0 != wifi_start(&init_param, true)) {
         goto err;
     }
@@ -688,7 +688,7 @@ partial_config:
         }
     }
 
-    wifi_station_connect((wifi_sta_config_t *)&wifi_config);
+    wifi_station_connect(&wifi_config);
 
     if(timeout_ms){
         at_connect_timeout(timeout_ms);
@@ -2671,10 +2671,10 @@ char at_get_cpu_usage(char * str)
 //chip sn
 char at_get_chip_sn(char * str)//AT+CSN?  +CSN:"01234567890123456789"
 {
-    char sn_str[CHIP_SN_LEN+1]  = {0,};
+    char sn_str[NV4_CHIP_SN_LEN+1]  = {0,};
 
     memset(sn_str, '\0', sizeof(sn_str));
-    nvds_read(CHIP_SN_OFFSET, (uint8_t *)sn_str, CHIP_SN_LEN);
+    ln_nvds_get_chip_sn((uint8_t *)sn_str, NV4_CHIP_SN_LEN);
 
     at_printf("\r\n+CSN:\"%s\"\r\n", sn_str);
     at_printf(RET_OK_STR);
@@ -2685,7 +2685,7 @@ char at_set_chip_sn(char * str)//AT+CSN="01234567890123456789"
 {
     int16_t len = 0;
     char * pos_start = str;
-    char sn_str[CHIP_SN_LEN+1]  = {0,};
+    char sn_str[NV4_CHIP_SN_LEN+1]  = {0,};
 
     ART_ASSERT(str);
 
@@ -2701,7 +2701,7 @@ char at_set_chip_sn(char * str)//AT+CSN="01234567890123456789"
         memset(sn_str, '\0', sizeof(sn_str));
         memcpy(sn_str, pos_start, len);
 
-        nvds_write(CHIP_SN_OFFSET, (uint8_t *)sn_str, CHIP_SN_LEN);
+        ln_nvds_set_chip_sn((uint8_t *)sn_str);
     } else {
         goto error_end;
     }
@@ -2711,369 +2711,6 @@ char at_set_chip_sn(char * str)//AT+CSN="01234567890123456789"
 
 error_end:
     at_printf(RET_ERR_STR);
-    return AT_OK;
-}
-
-//bt id
-char at_get_bt_id(char * str)//AT+CBTID?  +CBTID:"bt_name_123"
-{
-    char bt_id_str[BT_ID_LEN+1]  = {0,};
-
-    memset(bt_id_str, '\0', sizeof(bt_id_str));
-    nvds_read(BT_ID_OFFSET, (uint8_t *)bt_id_str, BT_ID_LEN);
-
-    at_printf("\r\n+CBTID:\"%s\"\r\n", bt_id_str);
-    at_printf(RET_OK_STR);
-    return AT_OK;
-}
-char at_set_bt_id(char * str)//AT+CBTID="bt_name_123"
-{
-    int16_t len = 0;
-    char * pos_start = str;
-    char bt_id_str[BT_ID_LEN+1]  = {0,};
-
-    ART_ASSERT(str);
-
-    pos_start = strchr(pos_start,'\"');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-
-        len = strcspn(pos_start, "\"");
-        if ((len < 1) || (len > (sizeof(bt_id_str)-1))){
-            goto error_end;
-        }
-
-        memset(bt_id_str, '\0', sizeof(bt_id_str));
-        memcpy(bt_id_str, pos_start, len);
-
-        nvds_write(BT_ID_OFFSET, (uint8_t *)bt_id_str, BT_ID_LEN);
-    } else {
-        goto error_end;
-    }
-
-    at_printf(RET_OK_STR);
-    return AT_OK;
-
-error_end:
-    at_printf(RET_ERR_STR);
-    return AT_OK;
-};
-
-
-//bt mac
-char at_get_bt_mac(char * str)//AT+CBTMAC?; +CBTMAC:"00:50:66:77:88:99"
-{
-    char bt_mac_str[BT_MAC_LEN] = {0,};
-
-    memset(bt_mac_str, '\0', sizeof(bt_mac_str));
-    nvds_read(BT_MAC_OFFSET, (uint8_t *)bt_mac_str, BT_MAC_LEN);
-
-    at_printf("\r\n+CBTMAC:\"%02x:%02x:%02x:%02x:%02x:%02x\"\r\n", \
-                bt_mac_str[0],bt_mac_str[1],bt_mac_str[2], \
-                bt_mac_str[3],bt_mac_str[4],bt_mac_str[5]);
-
-    at_printf(RET_OK_STR);
-    return AT_OK;
-};
-
-char at_set_bt_mac(char * str)//AT+CBTMAC="00:50:66:77:88:99"
-{
-    int16_t len = 0, i = 0;
-    char * pos_start = str;
-    char value_ch[3];
-    uint8_t bt_mac_str[BT_MAC_LEN] = {0,};
-
-    ART_ASSERT(str);
-
-    //bt_mac_str[0]
-    pos_start = strchr(pos_start,'\"');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len > 2)){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        bt_mac_str[0] = ln_char2hex(value_ch[0]) << 4;
-        bt_mac_str[0] += ln_char2hex(value_ch[1]);
-    } else {
-        goto error_end;
-    }
-
-    //bt_mac_str[1]
-    pos_start = strchr(pos_start,':');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len > 2)){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        bt_mac_str[1] = ln_char2hex(value_ch[0]) << 4;
-        bt_mac_str[1] += ln_char2hex(value_ch[1]);
-    } else {
-        goto error_end;
-    }
-
-    //bt_mac_str[2]
-    pos_start = strchr(pos_start,':');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len > 2)){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        bt_mac_str[2] = ln_char2hex(value_ch[0]) << 4;
-        bt_mac_str[2] += ln_char2hex(value_ch[1]);
-    } else {
-        goto error_end;
-    }
-
-    //bt_mac_str[3]
-    pos_start = strchr(pos_start,':');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len > 2)){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        bt_mac_str[3] = ln_char2hex(value_ch[0]) << 4;
-        bt_mac_str[3] += ln_char2hex(value_ch[1]);
-    } else {
-        goto error_end;
-    }
-
-    //bt_mac_str[4]
-    pos_start = strchr(pos_start,':');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len > 2)){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        bt_mac_str[4] = ln_char2hex(value_ch[0]) << 4;
-        bt_mac_str[4] += ln_char2hex(value_ch[1]);
-    } else {
-        goto error_end;
-    }
-
-    //bt_mac_str[5]
-    pos_start = strchr(pos_start,':');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len > 2)){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        bt_mac_str[5] = ln_char2hex(value_ch[0]) << 4;
-        bt_mac_str[5] += ln_char2hex(value_ch[1]);
-    } else {
-        goto error_end;
-    }
-
-    nvds_write(BT_MAC_OFFSET, (uint8_t *)bt_mac_str, BT_MAC_LEN);
-
-    at_printf(RET_OK_STR);
-    return AT_OK;
-
-error_end:
-    at_printf(RET_ERR_STR);
-    return AT_OK;
-};
-
-
-//CNVDS
-static char at_nvds_read(char * str)//AT+CNVDS=4092;+CNVDS:0x12345678
-{
-    int16_t len = 0, i = 0;
-    char * pos_start = str;
-    char value_ch[5];
-    uint32_t index = 0,data = 0;
-
-    ART_ASSERT(str);
-
-    pos_start = strpbrk(pos_start, "0123456789");
-    if(pos_start > 0) {
-        len = strspn(pos_start, "0123456789");
-
-        if ((len < 1) || (len >= sizeof(value_ch))){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        index = atoi(value_ch);
-        if(index > (SIZE_4KB - sizeof(uint32_t))){
-            goto error_end;
-        }
-    } else {
-        goto error_end;
-    }
-
-    memset(value_ch, '\0', sizeof(value_ch));
-    nvds_read(index, (uint8_t *)value_ch, sizeof(uint32_t));
-
-    data = value_ch[3] << 24;
-    data += value_ch[2] << 16;
-    data += value_ch[1] << 8;
-    data += value_ch[0];
-
-    at_printf("\r\n+CNVDS:0x%08x\r\n", data);
-
-    at_printf(RET_OK_STR);
-    return AT_OK;
-
-error_end:
-    at_printf(RET_ERR_STR);
-    return AT_OK;
-};
-
-static char at_nvds_write(char * str)//AT+CNVDS=4092,0x12345678
-{
-    int16_t len = 0, i = 0;
-    char * pos_start = str;
-    char value_ch[9];
-    uint32_t index = 0,data = 0;
-
-    ART_ASSERT(str);
-
-    //index
-    pos_start = strpbrk(pos_start, "0123456789");
-    if(pos_start > 0) {
-        len = strspn(pos_start, "0123456789");
-
-        if ((len < 1) || (len >= sizeof(value_ch))){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;){
-            value_ch[i]   = *(pos_start + i) ;
-            value_ch[++i] = '\0';
-        }
-
-        index = atoi(value_ch);
-        if((index > (SIZE_4KB - sizeof(uint32_t))) || (index < sizeof(uint32_t))){
-            goto error_end;
-        }
-    } else {
-        goto error_end;
-    }
-
-    //val
-    pos_start = strchr(pos_start,'x');
-    if(pos_start > 0) {
-        pos_start += sizeof(char);
-        pos_start = strpbrk(pos_start, "0123456789abcdefABCDEF");
-        len = strspn(pos_start, "0123456789abcdefABCDEF");
-
-        if ((len < 1) || (len >= sizeof(value_ch))){
-            goto error_end;
-        }
-
-        memset(value_ch, '\0', sizeof(value_ch));
-        for (i = 0; i < len ;i++){
-            value_ch[i]   = *(pos_start + i) ;
-            if(!isxdigit(value_ch[i])){
-                goto error_end;
-            }
-
-            data += ln_char2hex(value_ch[i]) << (((len - 1) - i)*4);
-        }
-
-    } else {
-        goto error_end;
-    }
-
-    nvds_write(index, (uint8_t *)&data, sizeof(data));
-
-    at_printf(RET_OK_STR);
-    return AT_OK;
-
-error_end:
-    at_printf(RET_ERR_STR);
-    return AT_OK;
-};
-
-char at_nvds(char * str)
-{
-    char * pos_start = str;
-    ART_ASSERT(str);
-
-    pos_start = strchr(pos_start,',');
-    if(pos_start)
-    {
-        pos_start += sizeof(char);
-        if(strstr(pos_start, "0x"))
-        {
-            at_nvds_write(str);
-        }
-        else
-        {
-            at_printf(RET_ERR_STR);
-            return AT_OK;
-        }
-    }
-    else
-    {
-        at_nvds_read(str);
-    }
     return AT_OK;
 }
 
@@ -3165,10 +2802,11 @@ error_end:
 char at_get_xtal_cap_comp(char * str)//AT+XTAL_COMP?; +XTAL_COMP:0
 {
     int8_t cmop = 0;
-    uint32_t v_len = 0;
 
-    if (LN_TRUE == ln_kv_has_key(KV_XTAL_COMP_VAL)) {
-        ln_kv_get(KV_XTAL_COMP_VAL, &cmop, sizeof(int8_t), &v_len);
+    if (NVDS_ERR_OK == ln_nvds_get_xtal_comp_val((uint8_t *)&cmop)) {
+        if ((uint8_t)cmop == 0xFF) {
+            cmop = 0;
+        }
     }
 
     at_printf("\r\n+XTAL_COMP:%d\r\n", cmop);
@@ -3208,7 +2846,7 @@ char at_set_xtal_cap_comp(char * str)//AT+XTAL_COMP=0 //set val rang:-20 ~ +10
         goto error_end;
     }
 
-    ln_kv_set(KV_XTAL_COMP_VAL, &val, sizeof(int8_t));
+    ln_nvds_set_xtal_comp_val((uint8_t)val);
 
     at_printf(RET_OK_STR);
     return AT_OK;
@@ -3222,10 +2860,11 @@ error_end:
 char at_get_tx_power_comp(char * str)//AT+TXPOWER_COMP?; +TXPOWER_COMP:0
 {
     int8_t cmop = 0;
-    uint32_t v_len = 0;
-
-    if (LN_TRUE == ln_kv_has_key(KV_TX_POWER_COMP_VAL)) {
-        ln_kv_get(KV_TX_POWER_COMP_VAL, &cmop, sizeof(int8_t), &v_len);
+    
+    if (NVDS_ERR_OK == ln_nvds_get_tx_power_comp((uint8_t *)&cmop)) {
+        if ((uint8_t)cmop == 0xFF) {
+            cmop = 0;
+        }
     }
 
     at_printf("\r\n+TXPOWER_COMP:%d\r\n", cmop);
@@ -3265,7 +2904,7 @@ char at_set_tx_power_comp(char * str)//AT+TXPOWER_COMP=0 //set val rang:-16 ~ +8
         goto error_end;
     }
 
-    ln_kv_set(KV_TX_POWER_COMP_VAL, &val, sizeof(int8_t));
+    ln_nvds_set_tx_power_comp((uint8_t)val);
 
     at_printf(RET_OK_STR);
     return AT_OK;

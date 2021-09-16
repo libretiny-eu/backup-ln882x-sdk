@@ -1,8 +1,17 @@
 cmake_minimum_required(VERSION  3.0.0)
 
 ################################################################################
-#########################  set up cross compiler toolchain  ####################
+#######################  NOTE: select user project first    ####################
 ################################################################################
+set(USER_PROJECT   wifi_mcu_basic_example)
+# set(USER_PROJECT   wifi_mcu_airkiss_demo)
+# set(USER_PROJECT   wifi_mcu_ota_demo)
+# set(USER_PROJECT   wifi_mcu_qcloud_misc_demo)
+# set(USER_PROJECT   wifi_mcu_smartconfig_demo)
+# set(USER_PROJECT   wifi_mcu_smartliving_demo)
+# set(USER_PROJECT   wifi_mcu_softapconfig_demo)
+
+#########################  set up cross compiler toolchain  ####################
 include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-arm-none-eabi.cmake)
 
 ################################################################################
@@ -16,7 +25,7 @@ project(${USER_PROJECT}
 ################################################################################
 ##############################  Debug/Release  #################################
 ################################################################################
-set(CMAKE_BUILD_TYPE Release) # default value is Debug.
+# set(CMAKE_BUILD_TYPE Release) # default value is Debug.
 
 if(NOT  CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE  Debug)
@@ -35,23 +44,6 @@ set(LIBRARY_OUTPUT_PATH       ${CMAKE_BINARY_DIR}/lib)
 
 #----------------------------   project output elf   ---------------------------
 set(TARGET_ELF_NAME  ${PROJECT_NAME}.elf)
-
-# NOTE: no need to keep variable `PRO_SOURCE` and `PRO_INCLUDE`.
-set(PRO_SOURCE   "")
-set(PRO_INCLUDE  "")
-
-################################################################################
-#####################   update flash partition table first  ####################
-################################################################################
-set(FLASH_PART_CFG_JSON    ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/cfg/flash_partition_cfg.json)
-set(FLASH_PART_TABLE_FILE  ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/cfg/flash_partition_table.h)
-
-add_custom_target(PHONY_TARGET_FLASH_PART_TABLE ALL)
-add_custom_command(TARGET  PHONY_TARGET_FLASH_PART_TABLE
-  PRE_BUILD
-  COMMAND python ${CMAKE_SOURCE_DIR}/tools/user_cmd/before_build.py ${FLASH_PART_CFG_JSON} ${FLASH_PART_TABLE_FILE}
-  COMMENT "--->  update flash_partition_table.h for ${USER_PROJECT}  <---"
-)
 
 ################################################################################
 ##########################   default module selection   ########################

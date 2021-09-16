@@ -1,12 +1,4 @@
-file(GLOB_RECURSE   QCLOUD_SRC  ${COMP_QCLOUD_SDK_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${QCLOUD_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}
-    ${COMP_QCLOUD_SDK_DIR}/include
-    ${COMP_QCLOUD_SDK_DIR}/include/exports
-    ${COMP_QCLOUD_SDK_DIR}/sdk_src/internal_inc
-    PARENT_SCOPE
-)
+file(GLOB_RECURSE   QCLOUD_SRC  ${COMP_QCLOUD_SDK_DIR}  "*.c")
 
 set(COMP_MBEDTLS_SUPPORT  ON  PARENT_SCOPE)
 

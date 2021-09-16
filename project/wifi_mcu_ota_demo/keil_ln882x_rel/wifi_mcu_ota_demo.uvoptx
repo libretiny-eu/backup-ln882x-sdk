@@ -1806,7 +1806,7 @@
 
   <Group>
     <GroupName>fs</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1829,8 +1829,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\components\fs\nvds\nvds.c</PathWithFileName>
-      <FilenameWithoutPath>nvds.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\components\fs\nvds\ln_nvds.c</PathWithFileName>
+      <FilenameWithoutPath>ln_nvds.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

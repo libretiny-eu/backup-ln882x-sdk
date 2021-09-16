@@ -1,5 +1,6 @@
 |         日期         |    版本  |                     摘要                     |
 | :------------------ | :------- | :------------------------------------------ |
+| 2021-09-16 16:03:44 | 713e0a12 | 1、KV 组件和 NVDS 组件更新；2、wifi 协议栈优化；3、CMake+GCC 编译脚本更新；4、QCloud OTA 下载修复； |
 | 2021-06-07 10:23:57 | f1a1b7a2 | 1、STA和SOFTAP模式切换时停止DHCP Server；2、DHCP Server 租约时间更新；3、更新 RF 参数；4、SystemView 调试组件；5、CMake+Nin构建 |
 | 2021-04-26 11:10:59 | a23c1b6c |  1、更新CMake编译系统；2、增加阿里飞燕smartliving sdk；3、更新 Flash 和 wifi 驱动 |
 | 2021-04-09 16:29:51 | c2c23b22 | 更正 GCC 编译 Tencent Qcloud SDK 产生的错误    |

@@ -44,4 +44,4 @@ target_include_directories(${pro_executable_target}
     ${MCU_LN882X_DIR}/driver_ln882x/inc/reg
 )
 
-include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-postbuild.cmake)
+include(${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/gcc-custom-build-stage.cmake)

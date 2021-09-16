@@ -1,7 +1,4 @@
-file(GLOB_RECURSE  SMARTCFG_SRC  ${COMP_SMARTCFG_DIR}  "*.c" "*.cpp")
-
-set(PRO_SOURCE   ${PRO_SOURCE}   ${SMARTCFG_SRC}  PARENT_SCOPE)
-set(PRO_INCLUDE  ${PRO_INCLUDE}  ${COMP_SMARTCFG_DIR}  PARENT_SCOPE)
+file(GLOB_RECURSE  SMARTCFG_SRC  ${COMP_SMARTCFG_DIR}  "*.c")
 
 set(smartcfg_static_target   "smartcfg")
 add_library(${smartcfg_static_target}  STATIC  ${SMARTCFG_SRC})
