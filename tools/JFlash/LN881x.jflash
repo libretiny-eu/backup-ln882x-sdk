@@ -2,7 +2,7 @@
   FileVersion = 2
 [GENERAL]
   ConnectMode = 0
-  CurrentFile = "..\..\..\project\firmware_XIP\keil_ln882x\flashimage.bin"
+  CurrentFile = ""
   DataFileSAddr = 0x00000000
   GUIMode = 0
   HostName = ""
@@ -37,7 +37,7 @@
   ChipName = "Cortex-M4"
 [FLASH]
   BaseAddr = 0x00000000
-  CustomRAMCode = "LN881x_Flash_2MB.mot"
+  CustomRAMCode = "LN882x_Flash_4MB.mot"
   NumBanks = 1
   UseCustomRAMCode = 1
 [PRODUCTION]

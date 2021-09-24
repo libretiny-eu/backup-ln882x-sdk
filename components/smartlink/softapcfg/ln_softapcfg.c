@@ -297,7 +297,6 @@ static int wifi_softap_startup(const char * ssid, const char * pwd, const char *
 
     wifi_set_mode(WIFI_MODE_AP);
 
-    // wifi_set_config_current(SOFT_AP_IF, &wifi_config); // FIXME: 不能使用这个API
     wifi_set_config(SOFT_AP_IF, &wifi_config);
 
     if (0 != wifi_start(&wifistart_init_param, true)) {

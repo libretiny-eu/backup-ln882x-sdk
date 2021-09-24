@@ -50,7 +50,6 @@
 #define WIFI_SWITCH                           DISABLE
 
 #define OS_TICK_COMPENSATE
-//#define LN_WIFI_USE_MULTI_CHARSET
 
 
 //Check big and endian mode

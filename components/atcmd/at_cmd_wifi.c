@@ -3011,9 +3011,7 @@ function description: to get SDK version of wifi lib
 *******************************************************/
 char at_software_version(void)
 {
-    unsigned char sdk_ver_wifi_lib[20]={0};
-    wifi_get_sdk_version(sdk_ver_wifi_lib);
-    at_printf("sw version:%s\r\n",sdk_ver_wifi_lib);
+    at_printf("sw version:%s\r\n", wifi_lib_version_string_get());
     at_printf(RET_OK_STR);
     return AT_OK;
 }

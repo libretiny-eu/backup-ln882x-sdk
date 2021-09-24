@@ -10,6 +10,16 @@ execute_process(COMMAND python ${FLASH_PYTHON_SCRIPT} ${FLASH_PART_CFG_JSON} ${F
 )
 
 ################################################################################
+###########################   update linker script  ############################
+################################################################################
+set(REWRITE_LINKERSCRIPT  ${CMAKE_SOURCE_DIR}/tools/scripts/rewrite_ln882x_linker_script.py)
+set(LINKER_PATH           ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc/ln882x.ld)
+
+execute_process(COMMAND python ${REWRITE_LINKERSCRIPT} ${FLASH_PART_CFG_JSON} ${LINKER_PATH}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/project/${USER_PROJECT}/gcc
+)
+
+################################################################################
 ################################   make image  #################################
 ################################################################################
 set(BIN_TARGET    ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}.bin)

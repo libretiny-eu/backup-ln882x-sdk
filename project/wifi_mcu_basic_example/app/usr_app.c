@@ -230,6 +230,14 @@ void usr_app_task_entry(void *params)
     //Set sleep mode
     hal_sleep_set_mode(ACTIVE);
 
+    LOG(LOG_LVL_INFO, "wlib version string: %s\r\n",     wifi_lib_version_string_get());
+    LOG(LOG_LVL_INFO, "wlib version number: 0x%08x\r\n", wifi_lib_version_number_get());
+    LOG(LOG_LVL_INFO, "wlib build time    : %s\r\n",     wifi_lib_build_time_get());
+
+    LOG(LOG_LVL_INFO, "SDK  version string: %s\r\n",     LN_SDK_VERSION_STRING);
+    LOG(LOG_LVL_INFO, "SDK  version number: 0x%08x\r\n", LN_SDK_VERSION);
+    LOG(LOG_LVL_INFO, "SDK  build time    : %s\r\n",     LN_SDK_BUILD_DATE_TIME);
+
     if_index = STATION_IF;
     wifi_init_sta();
 //    if_index = SOFT_AP_IF;

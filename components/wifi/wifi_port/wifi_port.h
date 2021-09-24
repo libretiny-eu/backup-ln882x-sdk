@@ -77,7 +77,6 @@ void   wlib_sdio_if_reset(void);
 
 /* ssid support multi charset */
 void   wlib_ssid_charset_match(const char *cfg_ssid, const char *target_ssid, char *out_data, uint32_t out_data_size);
-void   wlib_ssid_gbk2utf8(char *ssid);
 
 
 /* os service */

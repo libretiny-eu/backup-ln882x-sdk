@@ -150,6 +150,21 @@ typedef enum IRQn
   #error Not supported device type
 #endif
 
+/**
+ * @brief wifi sdk version
+ * 
+ * LN_SDK_MAJOR_V:    0-255
+ * LN_SDK_MINOR_V:    0-255
+ */
+#define LN_SDK_MAJOR_V        2
+#define LN_SDK_MINOR_V        0
+
+#define LN_SDK_VERSTR2(x)     #x
+#define LN_SDK_VERSTR(x)      LN_SDK_VERSTR2(x)
+
+#define LN_SDK_VERSION          ((uint32_t)(LN_SDK_MAJOR_V) << 24 | (uint32_t)(LN_SDK_MINOR_V) << 16)
+#define LN_SDK_VERSION_STRING   LN_SDK_VERSTR(LN_SDK_MAJOR_V) "." LN_SDK_VERSTR(LN_SDK_MINOR_V)
+#define LN_SDK_BUILD_DATE_TIME  ""__DATE__" "__TIME__
 
 #ifdef __cplusplus
 }

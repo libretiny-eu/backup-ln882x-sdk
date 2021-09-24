@@ -264,9 +264,6 @@ int wifi_get_psk_info(wifi_interface_enum_t if_index, wifi_psk_info_t *psk_info)
 
 int wifi_private_command(char *pvtcmd);
 
-uint8_t * get_wifi_lib_version(void);
-
-
 
 #define WIFI_PKT_MGMT                       (0)             /**< sniffer packet is management frame */
 #define WIFI_PKT_CTRL                       (1)             /**< sniffer packet is control frame */
@@ -292,7 +289,11 @@ int wifi_send_80211_mgmt_raw_frame(uint8_t *data, int len);
 
 int wifi_if_send_ethernet_pkt(uint8_t *data, int len, uint16_t retry_max, uint8_t retry_timeout);
 
-int wifi_get_sdk_version(uint8_t *sdk_ver);
+
+// wifi lib version
+uint32_t    wifi_lib_version_number_get(void);
+const char *wifi_lib_version_string_get(void);
+const char *wifi_lib_build_time_get(void);
 
 #ifdef __cplusplus
 }

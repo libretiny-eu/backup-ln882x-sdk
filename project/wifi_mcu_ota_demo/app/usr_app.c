@@ -204,6 +204,14 @@ void usr_app_task_entry(void *params)
     tcpip_ip_info_t ip_info = {0};
     wifi_interface_enum_t if_index;
 
+    LOG(LOG_LVL_INFO, "wlib version string: %s\r\n",     wifi_lib_version_string_get());
+    LOG(LOG_LVL_INFO, "wlib version number: 0x%08x\r\n", wifi_lib_version_number_get());
+    LOG(LOG_LVL_INFO, "wlib build time    : %s\r\n",     wifi_lib_build_time_get());
+
+    LOG(LOG_LVL_INFO, "SDK  version string: %s\r\n",     LN_SDK_VERSION_STRING);
+    LOG(LOG_LVL_INFO, "SDK  version number: 0x%08x\r\n", LN_SDK_VERSION);
+    LOG(LOG_LVL_INFO, "SDK  build time    : %s\r\n",     LN_SDK_BUILD_DATE_TIME);
+
     if(wifi_mode == WIFI_MODE_STATION){
         if_index = STATION_IF;
         wifi_init_sta();

@@ -17,7 +17,7 @@
 #define FALSH_SIZE_4K           (4 *1024)
 #define FALSH_SIZE_BLOCK_32K    (32*1024)
 #define FALSH_SIZE_BLOCK_64K    (64*1024)
-#define FALSH_SIZE_MAX		    (2 *1024*1024)
+#define FALSH_SIZE_MAX		    (4 *1024*1024)
 
 
 typedef enum
